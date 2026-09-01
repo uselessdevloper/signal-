@@ -9,10 +9,10 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-lg font-semibold">Credify</span>
+              <span className="text-lg font-semibold">Signal</span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-[240px]">
-              Evidence-backed skill verification for the next generation of professionals.
+              Autonomous multi-agent career pipeline and deterministic proof-of-skill forensics for students and engineers.
             </p>
           </div>
 
@@ -20,7 +20,7 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-semibold mb-3">Product</h4>
             <ul className="space-y-2">
-              {["Skill Passport", "Gap Analysis", "Career Roadmap", "GitHub Analysis"].map((item) => (
+              {["Multi-Agent Pipeline", "Live Kanban Board", "MINSKY Forensics", "Career Optimization", "AI Outreach Drafting"].map((item) => (
                 <li key={item}>
                   <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {item}
@@ -61,7 +61,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Credify. All rights reserved.
+            © {new Date().getFullYear()} Signal. All rights reserved.
           </p>
         </div>
       </div>

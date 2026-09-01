@@ -16,33 +16,37 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Credify — AI-Powered Skill Passport",
-    template: "%s | Credify",
+    default: "Signal — Autonomous Multi-Agent Career Pipeline",
+    template: "%s | Signal",
   },
   description:
-    "Transform your GitHub activity and certifications into an evidence-backed professional identity. Understand your strengths, identify skill gaps, and get personalized career roadmaps.",
+    "Autonomous multi-agent career pipeline orchestrating recruiter email parsing, MINSKY code forensics, semantic skill gap analysis, live Kanban tracking, and AI drafting.",
   keywords: [
+    "Signal",
+    "multi-agent pipeline",
     "skill passport",
-    "github analysis",
+    "github forensics",
+    "minsky",
+    "kanban tracking",
     "career roadmap",
     "skill verification",
     "professional identity",
   ],
-  authors: [{ name: "Credify" }],
+  authors: [{ name: "Signal" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: process.env.NEXT_PUBLIC_APP_URL,
-    title: "Credify — AI-Powered Skill Passport",
+    title: "Signal — Autonomous Multi-Agent Career Pipeline",
     description:
-      "Transform your GitHub activity and certifications into an evidence-backed professional identity.",
-    siteName: "Credify",
+      "Autonomous multi-agent career workflow orchestrating recruiter ingestion, MINSKY code forensics, real-time Kanban, and AI drafting.",
+    siteName: "Signal",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Credify — AI-Powered Skill Passport",
+    title: "Signal — Autonomous Multi-Agent Career Pipeline",
     description:
-      "Transform your GitHub activity and certifications into an evidence-backed professional identity.",
+      "Autonomous multi-agent career workflow orchestrating recruiter ingestion, MINSKY code forensics, real-time Kanban, and AI drafting.",
   },
 };
 

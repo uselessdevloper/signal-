@@ -47,7 +47,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Custom Credify brand colors */
+  /* Custom Signal brand colors */
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-success: var(--success);
@@ -103,7 +103,7 @@
   --warning: oklch(0.828 0.189 84.429);
 }
 
-/* ─── Dark mode (default for Credify) ─── */
+/* ─── Dark mode (default for Signal) ─── */
 .dark {
   --background: oklch(0.09 0.005 270);
   --foreground: oklch(0.95 0 0);
@@ -156,7 +156,7 @@
   }
 }
 
-/* ─── Custom Credify utilities ─── */
+/* ─── Custom Signal utilities ─── */
 @layer utilities {
 
   /* Glassmorphism helper */

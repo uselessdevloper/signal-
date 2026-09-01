@@ -243,7 +243,7 @@ export const NavbarLogo = () => {
         height={30}
         className="dark:invert"
       />
-      <span className="font-medium text-inherit">Credify</span>
+      <span className="font-medium text-inherit">Signal</span>
     </a>
   );
 };

@@ -23,7 +23,7 @@ export function MobileNav({ user }: MobileNavProps) {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Shield className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">Credify</span>
+          <span className="text-lg font-semibold tracking-tight">Signal</span>
         </Link>
       </div>
 

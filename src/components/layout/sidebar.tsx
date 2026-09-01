@@ -16,12 +16,16 @@ import {
   FileBadge,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Kanban,
+  Bot
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const SIDEBAR_ITEMS = [
   { name: "Skill Card", href: "/dashboard", icon: UserCircle },
+  { name: "Signal Multi-Agent", href: "/dashboard/tracker", icon: Bot },
+  { name: "Live Kanban Board", href: "/dashboard/tracker?tab=kanban", icon: Kanban },
   { name: "Find Team", href: "/dashboard/find-team", icon: Users },
   { name: "Create Teammates", href: "/dashboard/create-teammates", icon: UserPlus },
   { name: "Internships", href: "/dashboard/internships", icon: Briefcase },
@@ -31,8 +35,6 @@ const SIDEBAR_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  // We can toggle this via a button if needed, but the prompt says 
-  // "collapsed state / expanded state". I'll use a hover or a toggle.
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [userProfile, setUserProfile] = useState<{name: string, avatar: string} | null>(null);
 
@@ -127,7 +129,7 @@ export function Sidebar() {
                 exit={{ opacity: 0, width: 0 }}
                 className="font-semibold text-[14px] text-white whitespace-nowrap overflow-hidden"
               >
-                Credo
+                Signal
               </motion.span>
             )}
           </AnimatePresence>
