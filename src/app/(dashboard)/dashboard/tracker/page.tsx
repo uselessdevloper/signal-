@@ -340,43 +340,43 @@ export default function SignalTrackerPage() {
   const stages: Stage[] = ["Applied", "Screening", "Interview", "Offer", "Rejected"];
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#090b10] text-zinc-100 p-4 md:p-8 font-sans">
+    <div className="flex-1 flex flex-col min-h-screen bg-transparent text-foreground p-4 md:p-8 font-sans">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md">
               <Bot className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-              Signal Multi-Agent Command Center
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 font-medium">
-                LangGraph v3.0
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
+              AI Job Application Tracker
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-600 font-semibold">
+                6 Agents · LangGraph
               </span>
             </h1>
           </div>
-          <p className="text-sm text-zinc-400 max-w-2xl">
-            Autonomous career workflow orchestrating recruiter email parsing, MINSKY code forensics, semantic gap analysis, live Kanban tracking, and AI outreach.
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            Autonomous career pipeline: email parsing, MINSKY code forensics, semantic ATS gap analysis, live Kanban, AI outreach drafting, and scheduled nudges.
           </p>
         </div>
 
         {/* GCP Stack Health Pill */}
-        <div className="flex items-center gap-3 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-2.5 px-4 text-xs text-zinc-300">
+        <div className="flex items-center gap-3 bg-white border border-border rounded-2xl p-2.5 px-4 text-xs shadow-sm">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-semibold text-white">Firestore Sync:</span>
-            <span className="text-emerald-400 font-mono">&lt;140ms</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-semibold text-foreground">Firestore Sync:</span>
+            <span className="text-emerald-600 font-mono font-bold">&lt;140ms</span>
           </div>
-          <div className="h-4 w-px bg-zinc-700" />
-          <div className="flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-blue-400" />
-            <span>Gemini 2.5 / 3 Flash</span>
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Cpu className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Gemini 2.5 Flash</span>
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto py-4 border-b border-zinc-800/60 no-scrollbar">
+      <div className="flex items-center gap-2 overflow-x-auto py-4 border-b border-border no-scrollbar">
         {[
           { id: "kanban", label: "Live Kanban Board", icon: Kanban, count: cards.length },
           { id: "pipeline", label: "Email & Ingestion Agent", icon: Mail, tag: "Pub/Sub" },
@@ -394,17 +394,17 @@ export default function SignalTrackerPage() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap",
                 isActive
-                  ? "bg-zinc-100 text-zinc-950 shadow-md scale-[1.02]"
-                  : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 border border-zinc-800/60"
+                  ? "bg-indigo-600 text-white shadow-md"
+                  : "bg-white text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
               )}
             >
-              <Icon className={cn("w-3.5 h-3.5", isActive ? "text-zinc-950" : "text-zinc-400")} />
+              <Icon className={cn("w-3.5 h-3.5", isActive ? "text-white" : "text-muted-foreground")} />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span
                   className={cn(
-                    "text-[10px] px-1.5 py-0.2 rounded-full font-bold",
-                    isActive ? "bg-zinc-300 text-zinc-900" : "bg-zinc-800 text-zinc-400"
+                    "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
+                    isActive ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
                   )}
                 >
                   {tab.count}
@@ -414,7 +414,7 @@ export default function SignalTrackerPage() {
                 <span
                   className={cn(
                     "text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider font-mono",
-                    isActive ? "bg-zinc-300/80 text-zinc-900" : "bg-zinc-800/80 text-blue-400"
+                    isActive ? "bg-white/15 text-indigo-100" : "bg-indigo-50 text-indigo-600"
                   )}
                 >
                   {tab.tag}

@@ -379,3 +379,235 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.54 0.22 276 / 35%);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   GHOST.AI EXACT STYLES (Stage, CRT, Keycaps, Blueprint Paper, Footer)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ghost-stage {
+  overscroll-behavior: none;
+  background: linear-gradient(#48bcf7 0%, #fff 100%);
+  width: 100vw;
+  height: 100dvh;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  position: relative;
+  overflow: clip;
+}
+
+.ghost-gradient-wash {
+  pointer-events: none;
+  filter: blur(3dvh);
+  background: linear-gradient(
+    #dcece8 10.74%,
+    #9ef0ff 28.139%,
+    #008dee 42.5%,
+    #0179e9 53.397%,
+    #bdeef3 56.333%,
+    #fa4700 69.492%,
+    #b24a3b 76.076%,
+    #6b383d 79.498%,
+    #3c2024 82.599%
+  );
+  width: 130vw;
+  height: 139.667dvh;
+  position: absolute;
+  top: -15.556dvh;
+  left: 50%;
+  transform: translate(-50%);
+  transition: opacity 0.8s ease;
+}
+
+.ghost-tv-lines {
+  z-index: 50;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.04) 0px,
+    rgba(0, 0, 0, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.ghost-vignette {
+  z-index: 51;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.ghost-top-bar {
+  top: 32px;
+  z-index: 60;
+  justify-content: space-between;
+  align-items: flex-start;
+  display: flex;
+  position: absolute;
+  left: 32px;
+  right: 32px;
+}
+
+.ghost-tagline {
+  text-align: right;
+  color: #fff;
+  font-family: var(--font-geist-mono, monospace);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ghost-typing::after {
+  content: "";
+  vertical-align: -0.15em;
+  background: currentColor;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 4px;
+  animation: 0.8s step-end infinite ghost-caret-blink;
+  display: inline-block;
+}
+
+@keyframes ghost-caret-blink {
+  50% { opacity: 0; }
+}
+
+.ghost-wordmark {
+  z-index: 40;
+  cursor: pointer;
+  display: block;
+  position: fixed;
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.ghost-wordmark.pos-center {
+  top: 46%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.ghost-wordmark.pos-topleft {
+  top: 28px;
+  left: 32px;
+  transform: scale(0.32);
+  transform-origin: 0 0;
+}
+
+.ghost-cta {
+  z-index: 45;
+  align-items: center;
+  gap: 12px;
+  display: flex;
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  user-select: none;
+}
+
+.ghost-cta-label {
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.ghost-return-key {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.ghost-return-key:hover {
+  transform: scale(1.05);
+}
+
+.ghost-return-key:active,
+.ghost-return-key.pressed {
+  transform: scale(0.93);
+}
+
+.ghost-blueprint-paper {
+  background: #f6fafe;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px -15px rgba(0, 20, 60, 0.3), 0 0 0 1px rgba(0, 109, 223, 0.2);
+  background-image:
+    linear-gradient(rgba(0, 109, 223, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 109, 223, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.ghost-blueprint-ruler-left {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 18px;
+  border-right: 1px solid rgba(0, 109, 223, 0.15);
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(0, 109, 223, 0.3) 0px,
+    rgba(0, 109, 223, 0.3) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+}
+
+.ghost-blueprint-ruler-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  border-left: 1px solid rgba(0, 109, 223, 0.15);
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(0, 109, 223, 0.3) 0px,
+    rgba(0, 109, 223, 0.3) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+}
+
+.ghost-system-copy {
+  color: #006ddf;
+  font-family: var(--font-geist-mono, monospace);
+  font-size: 15px;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+}
+
+.ghost-footer-metal {
+  background: radial-gradient(ellipse at 50% 0%, #2a2c32 0%, #111215 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.ghost-footer-metal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
