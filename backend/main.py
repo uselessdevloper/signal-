@@ -41,6 +41,23 @@ app = FastAPI(
 SESSION_SECRET = os.getenv("SESSION_SECRET", "signal-dev-secret-2026")
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET, same_site="lax")
 
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "service": "Signal Multi-Agent AI Pipeline & Forensics API",
+        "version": "3.0.0",
+        "agents": 6,
+    }
+
+@app.get("/api/health")
+def health():
+    return {
+        "status": "healthy",
+        "pipeline": "LangGraph Signal 6-Agent StateMachine",
+        "gemini_model": "gemini-2.5-flash",
+    }
+
 # Allow requests from the Next.js frontend
 app.add_middleware(
     CORSMiddleware,
