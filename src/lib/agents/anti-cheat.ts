@@ -63,7 +63,7 @@ Repo: Next-js-demo. Languages: { "TypeScript": 1000 }. README: "This is a [Next.
 Score: 30. Flags: ["Default create-next-app README", "No custom description"]. Skills: ["Next.js", "TypeScript"]. Status: "flagged"
 
 Example 2 (Real Project):
-Repo: credo-web. Languages: { "TypeScript": 45000, "CSS": 2000 }. README: "Credify is a verifiable skill passport built for SIH. We use Supabase for PostgreSQL RLS..."
+Repo: signal-web. Languages: { "TypeScript": 45000, "CSS": 2000 }. README: "Signal is an autonomous multi-agent career workflow system built with LangGraph and Cloud Pub/Sub..."
 Score: 95. Flags: []. Skills: ["TypeScript", "CSS", "Supabase", "PostgreSQL"]. Status: "verified"`;
 
     messages = [

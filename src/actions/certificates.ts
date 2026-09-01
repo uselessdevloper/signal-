@@ -53,7 +53,7 @@ export async function uploadCertificateMetadata({
     // Default fallback text using metadata
     const extractionText = `Certificate Title: ${title}. Issuer: ${issuer || 'N/A'}. File: ${fileName}`;
     
-    // [Elite Engineer Fix] Fetch the file and extract skills visually using Multimodal LLM
+    // Extract skills visually using Multimodal LLM from storage file
     
     // SSRF Protection: Ensure fileUrl is explicitly from our Supabase Storage bucket
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -185,7 +185,7 @@ export async function verifyCredlyBadge(badgeUrlOrId: string) {
     const credlyRes = await fetch(`https://www.credly.com/badges/${badgeId}.json`, {
       headers: {
         Accept: "application/json",
-        "User-Agent": "Credify-CredentialVerifier/2.0",
+        "User-Agent": "Signal-CredentialVerifier/2.0",
       },
     });
 
@@ -336,6 +336,49 @@ export async function verifyOpenBadge(badgeJsonUrl: string) {
     return { success: true, title, issuer };
   } catch (err: any) {
     return { success: false, error: err?.message || "Failed to verify Open Badge." };
+  }
+}
+
+export async function deleteCertificate(certId: string | number, fileUrl?: string) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "Unauthorized." };
+  }
+
+  try {
+    const { error } = await supabase
+      .from("certificates")
+      .delete()
+      .eq("id", certId)
+      .eq("profile_id", user.id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Attempt to remove file if in storage
+    if (fileUrl && fileUrl.includes("/certificates/")) {
+      const parts = fileUrl.split("/certificates/");
+      if (parts[1]) {
+        await supabase.storage.from("certificates").remove([parts[1]]);
+      }
+    }
+
+    // Regenerate passport
+    try {
+      const { generatePassport } = await import("@/actions/passport");
+      await generatePassport();
+    } catch {
+      // ignore
+    }
+
+    revalidatePath("/certificates");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || "Failed to delete certificate." };
   }
 }
 

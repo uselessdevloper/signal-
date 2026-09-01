@@ -216,7 +216,7 @@ export async function analyzeGitHubRealtime(username: string, token?: string) {
 
   const headers: Record<string, string> = {
     Accept: "application/vnd.github.v3+json",
-    "User-Agent": "Credify-GitProof/2.0",
+    "User-Agent": "Signal-GitProof/2.0",
   };
 
   if (token) {

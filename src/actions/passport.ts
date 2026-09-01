@@ -210,11 +210,16 @@ export async function generatePassport() {
         .eq("id", job.id);
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/passport");
+    try {
+      revalidatePath("/dashboard");
+      revalidatePath("/passport");
+    } catch (_) {
+      // Ignore if called inside server render phase
+    }
 
     return { success: true, job_id: jobId, status: "completed", snapshotData };
   } catch (error: any) {
+
     console.error("[generatePassport] Error:", error);
     if (job?.id) {
       await supabase

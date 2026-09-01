@@ -1,11 +1,11 @@
 "use client";
 
 const STORAGE_KEYS = {
-  GITHUB_USER: "credify_github_user",
-  GITHUB_TOKEN: "credify_github_token",
-  USER_PROFILE: "credify_user_profile",
-  PASSPORT_CACHE: "credify_passport_cache",
-  AUTH_SESSION: "credify_auth_session",
+  GITHUB_USER: "signal_github_user",
+  GITHUB_TOKEN: "signal_github_token",
+  USER_PROFILE: "signal_user_profile",
+  PASSPORT_CACHE: "signal_passport_cache",
+  AUTH_SESSION: "signal_auth_session",
 };
 
 export function saveCachedSession(data: {
