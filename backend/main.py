@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Add gitproof and credential_verifier directories to sys.path so submodules resolve properly
 gitproof_dir = str(Path(__file__).parent / "gitproof")
 verifier_dir = str(Path(__file__).parent / "credential_verifier-main")
 
@@ -33,32 +32,21 @@ except ImportError:
     REGISTRY_PATH = verifier_mod.REGISTRY_PATH
 
 app = FastAPI(
-    title="Signal Multi-Agent AI Pipeline & Forensics API",
-    description="Orchestrated 6-agent career pipeline with Gemini 2.5 Flash, Cloud Pub/Sub, Cloud Firestore, and Cloud Tasks.",
-    version="3.0.0"
+    title="Signal — AI Job Application Tracker API",
+    description=(
+        "6-agent LangGraph pipeline for autonomous job application tracking. "
+        "Agents: Email Ingestion (Cloud Pub/Sub), MINSKY Code Forensics, "
+        "Career Optimization, Live Kanban (Cloud Firestore), AI Drafting (Gemini 2.5 Flash), "
+        "and Scheduled Nudges (Cloud Tasks)."
+    ),
+    version="3.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 SESSION_SECRET = os.getenv("SESSION_SECRET", "signal-dev-secret-2026")
+
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET, same_site="lax")
-
-@app.get("/")
-def root():
-    return {
-        "status": "ok",
-        "service": "Signal Multi-Agent AI Pipeline & Forensics API",
-        "version": "3.0.0",
-        "agents": 6,
-    }
-
-@app.get("/api/health")
-def health():
-    return {
-        "status": "healthy",
-        "pipeline": "LangGraph Signal 6-Agent StateMachine",
-        "gemini_model": "gemini-2.5-flash",
-    }
-
-# Allow requests from the Next.js frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "*"],
@@ -67,7 +55,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Request Schemas
+
+@app.get("/")
+def root():
+    return {
+        "service": "Signal — AI Job Application Tracker",
+        "version": "3.0.0",
+        "gcp_stack": {
+            "llm": "Gemini 2.5 Flash (Vertex AI)",
+            "ingestion": "Cloud Pub/Sub",
+            "database": "Cloud Firestore",
+            "scheduler": "Cloud Tasks",
+            "compute": "Cloud Run",
+        },
+        "agents": {
+            "1": "Email & Ingestion Agent",
+            "2": "MINSKY Code Forensics Agent",
+            "3": "Career Optimization Agent",
+            "4": "Tracking Agent (Live Kanban)",
+            "5": "AI Drafting Agent",
+            "6": "Scheduled Nudge Agent",
+        },
+        "docs": "/docs",
+    }
+
+
+@app.get("/api/health")
+def health():
+    return {
+        "status": "healthy",
+        "pipeline": "LangGraph 6-Agent StateMachine",
+        "gemini_model": "gemini-2.5-flash",
+    }
+
+
 class PipelineRunRequest(BaseModel):
     inbound_email: Optional[Dict[str, Any]] = None
     company: Optional[str] = "TechCorp"
@@ -77,25 +98,30 @@ class PipelineRunRequest(BaseModel):
     github_token: Optional[str] = None
     github_username: Optional[str] = None
 
+
 class EmailIngestRequest(BaseModel):
     sender: str
     subject: str
     body: str
     pubsub_message_id: Optional[str] = None
 
+
 class MinskyAuditRequest(BaseModel):
     github_token: Optional[str] = None
     github_username: Optional[str] = None
     skills: Optional[List[str]] = None
 
+
 class GapAnalysisRequest(BaseModel):
     job_description: str
     verified_skills: Optional[List[str]] = None
+
 
 class DraftingRequest(BaseModel):
     company: str
     role: str
     skills: Optional[List[str]] = None
+
 
 class NudgeScheduleRequest(BaseModel):
     company: str
@@ -103,43 +129,9 @@ class NudgeScheduleRequest(BaseModel):
     interview_date: Optional[str] = None
 
 
-# Root & Health Check
-@app.get("/")
-def read_root():
-    return {
-        "status": "online",
-        "service": "Signal Multi-Agent Engine",
-        "gcp_stack": {
-            "reasoning_model": "Gemini 2.5 Flash / Gemini 3 Flash (Vertex AI)",
-            "ingestion": "Cloud Pub/Sub (Gmail Webhooks)",
-            "database": "Cloud Firestore (Sub-second near real-time sync)",
-            "scheduler": "Cloud Tasks (Background nudge dispatching)",
-            "compute": "Cloud Run (Minimal idle cost, pay-per-use)",
-            "security": "Cloud Identity Platform + Cloud KMS",
-        },
-        "agents": [
-            "1. Email & Ingestion Agent (Pub/Sub parser)",
-            "2. MINSKY (GitProof Code Forensics Agent)",
-            "3. Career Optimization Agent (Semantic gap analyzer)",
-            "4. Tracking Agent (Kanban serve & user override handler)",
-            "5. AI Drafting Agent (Evidence-backed outreach generator)",
-            "6. Scheduled Nudge Agent (Cloud Tasks automated dispatcher)",
-        ],
-        "endpoints": {
-            "full_pipeline": "/api/pipeline/run",
-            "email_ingest": "/api/email/ingest",
-            "minsky_audit": "/api/minsky/audit",
-            "gap_analysis": "/api/optimize/gap-analysis",
-            "kanban_state": "/api/kanban/state",
-            "ai_draft": "/api/draft/outreach",
-            "nudge_schedule": "/api/nudge/schedule",
-        }
-    }
-
-
-# 1. Full LangGraph Multi-Agent Orchestration Run
 @app.post("/api/pipeline/run")
 def run_full_pipeline(req: PipelineRunRequest):
+    """Run all 6 agents in sequence via the LangGraph state machine."""
     try:
         initial_state = {
             "inbound_email": req.inbound_email,
@@ -159,7 +151,6 @@ def run_full_pipeline(req: PipelineRunRequest):
             "errors": [],
         }
 
-        # Run through LangGraph 6-agent state machine
         final_state = signal_graph.invoke(initial_state)
 
         return {
@@ -181,9 +172,9 @@ def run_full_pipeline(req: PipelineRunRequest):
         )
 
 
-# 2. Email & Ingestion Agent Endpoint
 @app.post("/api/email/ingest")
 def ingest_email_pubsub(req: EmailIngestRequest):
+    """Agent 1: Parse a recruiter email received via Cloud Pub/Sub push subscription."""
     from graph import email_ingestion_agent
     state = {
         "inbound_email": {
@@ -198,9 +189,9 @@ def ingest_email_pubsub(req: EmailIngestRequest):
     return {"success": True, "data": result}
 
 
-# 3. MINSKY Forensics Endpoint
 @app.post("/api/minsky/audit")
 def minsky_audit(req: MinskyAuditRequest):
+    """Agent 2: MINSKY code forensics — verify GitHub contributions via GPG signatures + metadata heuristics."""
     from graph import minsky_forensics_agent
     state = {
         "github_token": req.github_token,
@@ -211,9 +202,9 @@ def minsky_audit(req: MinskyAuditRequest):
     return {"success": True, "data": result}
 
 
-# 4. Career Optimization (Semantic Gap Analysis) Endpoint
 @app.post("/api/optimize/gap-analysis")
 def optimize_gap_analysis(req: GapAnalysisRequest):
+    """Agent 3: Semantic gap analysis between verified skill badges and a job description."""
     from graph import career_optimization_agent
     state = {
         "job_description": req.job_description,
@@ -225,18 +216,18 @@ def optimize_gap_analysis(req: GapAnalysisRequest):
     return {"success": True, "data": result}
 
 
-# 5. Tracking Agent (Kanban State & Overrides)
 @app.get("/api/kanban/state")
 def get_kanban_state():
+    """Agent 4: Fetch the current live Kanban board state synced from Cloud Firestore."""
     from graph import tracking_agent
-    state = {"company": "Acme Corp", "job_title": "Software Engineer"}
+    state = {"company": "Acme Corp", "job_title": "Software Engineer", "ingestion_result": {}}
     result = tracking_agent(state)
     return {"success": True, "data": result.get("kanban_state")}
 
 
-# 6. AI Drafting Agent Endpoint
 @app.post("/api/draft/outreach")
 def generate_drafted_outreach(req: DraftingRequest):
+    """Agent 5: Generate evidence-backed cover letters and cold outreach using Gemini 2.5 Flash."""
     from graph import ai_drafting_agent
     state = {
         "company": req.company,
@@ -249,9 +240,9 @@ def generate_drafted_outreach(req: DraftingRequest):
     return {"success": True, "data": result.get("drafted_outreach")}
 
 
-# 7. Scheduled Nudge Agent Endpoint
 @app.post("/api/nudge/schedule")
 def schedule_nudges(req: NudgeScheduleRequest):
+    """Agent 6: Schedule interview prep alerts and recruiter follow-ups via Google Cloud Tasks."""
     from graph import scheduled_nudge_agent
     state = {
         "company": req.company,
@@ -262,9 +253,9 @@ def schedule_nudges(req: NudgeScheduleRequest):
     return {"success": True, "data": result.get("scheduled_nudges")}
 
 
-# Verifiable Credential Verification
 @app.post("/api/credentials/verify")
 def verify_vc(payload: dict = Body(...)):
+    """Verify a W3C Verifiable Credential against the Signal trust registry."""
     try:
         cred = payload.get("credential", payload)
         result = verify_credential(cred)
@@ -278,6 +269,7 @@ def verify_vc(payload: dict = Body(...)):
             detail={"code": "VERIFICATION_ERROR", "message": str(e)}
         )
 
+
 @app.get("/api/credentials/registry")
 def get_registry():
     if os.path.exists(REGISTRY_PATH):
@@ -285,5 +277,5 @@ def get_registry():
             return json.load(f)
     return {}
 
-# Mount GitProof subapp
+
 app.mount("/gitproof", gitproof_app)

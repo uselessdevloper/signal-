@@ -1,121 +1,110 @@
-# ⚡ Signal: Autonomous Multi-Agent Career Workflow & Code Forensics
+# ⚡ Signal — AI Job Application Tracker
 
-> **Problem**: Suppose you are a student ready for your career, but lost in the noise, unsure, overwhelmed by manual application tracking, and facing silent ATS resume rejections. **Signal** orchestrates your complete career workflow with deterministic proof-of-skill forensics and an autonomous multi-agent pipeline.
+> **The problem**: You're a student ready for your career but drowning in spreadsheets, facing silent ATS rejections, and getting ghosted after interviews. Signal fixes this with a 6-agent LangGraph pipeline that autonomously tracks applications, verifies your GitHub contributions, and drafts recruiter outreach — all powered by Gemini 2.5 Flash on GCP.
 
 ---
 
-## 🎯 Architecture: 6-Agent LangGraph Pipeline
-
-Signal replaces static resumes and chaotic application spreadsheets with a synchronized multi-agent pipeline:
+## Architecture: 6-Agent LangGraph Pipeline
 
 ```mermaid
 flowchart LR
-    PubSub[Cloud Pub/Sub: Gmail Events] --> Agent1[1. Email & Ingestion Agent]
-    Agent1 -->|Writes to Firestore| Agent4[4. Tracking Agent & Live Kanban]
-    Agent1 --> Agent2[2. MINSKY Code Forensics Agent]
-    Agent2 -->|Verified Proof Badges| Agent3[3. Career Optimization Agent]
-    Agent3 -->|Semantic ATS Alignment| Agent5[5. AI Drafting Agent]
-    Agent4 --> Agent6[6. Scheduled Nudge Agent via Cloud Tasks]
+    PubSub[Cloud Pub/Sub\nGmail Events] --> A1[1. Email Ingestion]
+    A1 --> A2[2. MINSKY\nCode Forensics]
+    A2 --> A3[3. Career\nOptimization]
+    A3 --> A4[4. Tracking Agent\nLive Kanban]
+    A4 --> A5[5. AI Drafting\nGemini 2.5 Flash]
+    A5 --> A6[6. Scheduled Nudges\nCloud Tasks]
 ```
 
-### The 6 Agents
-
-1. **Email & Ingestion Agent**
-   - Connects to Gmail via Cloud Pub/Sub push topics.
-   - Autonomously parses recruiter emails, interview invitations, stage updates, and interview dates/times.
-   - **Write-path**: Updates application documents in Cloud Firestore with sub-second latency.
-
-2. **MINSKY (GitProof Forensics Agent)**
-   - Audits GitHub repositories using a dual-path verification strategy:
-     - **Cryptographic Signatures**: Checks for GPG/SSH commit signatures where available (Yukawa potential term $\Phi$).
-     - **Deterministic Physics-Based Fallback**: When signatures are absent (common for student developers), verifies proof-of-skill via commit frequency over time (Relativistic Momentum $p$ with Lorentz burst damping $1/\gamma$), file distribution (Inertial Mass $M$), Poisson arrival distribution (Boltzmann Entropy $S$), PR review history (Carnot Efficiency $\eta$), and Stokes fork drag.
-   - Outputs deterministic, non-gameable proof scores (0–100) and verified badges.
-
-3. **Career Optimization Agent**
-   - Conducts semantic gap analysis between candidate's verified proof badges and target job descriptions.
-   - Identifies matching strengths, missing technical requirements, and delivers tailored ATS optimization guidance.
-
-4. **Tracking Agent**
-   - Serves and renders the live real-time Kanban board across `Applied`, `Screening`, `Interview`, `Offer`, and `Rejected` stages.
-   - Supports manual user drag-and-drop overrides and status management.
-
-5. **AI Drafting Agent**
-   - Generates personalized, evidence-backed cover letters, cold outreach messages, and follow-up templates referencing verified GitHub proof metrics.
-   - Powered by Gemini 2.5 Flash / Gemini 3 Flash.
-
-6. **Scheduled Nudge Agent**
-   - Dispatches automated, time-sensitive follow-up reminders and interview preparation alerts.
-   - Orchestrated via Google Cloud Tasks queues (`signal-interview-alerts`, `signal-recruiter-followup`).
-
----
-
-## ☁️ Google Cloud Platform (GCP) Stack
-
-| Component | Service | Role |
+| # | Agent | What it does |
 |---|---|---|
-| **Agent Reasoning & Drafting** | **Gemini 2.5 Flash / Gemini 3 Flash** (Vertex AI) | High-speed multi-agent semantic analysis, parsing, and outreach generation |
-| **Recruiter Ingestion** | **Cloud Pub/Sub** | Asynchronous ingestion stream for inbound Gmail webhook push events |
-| **Live Kanban State** | **Cloud Firestore** | Sub-second near real-time document sync and forensic metadata storage |
-| **Background Nudge Queues** | **Cloud Tasks** | Time-delayed queue execution for automated follow-up reminders |
-| **Container Compute** | **Cloud Run** | Pay-per-use, scale-to-zero serverless container runtime (minimal idle cost) |
-| **Auth & Security** | **Identity Platform + Cloud KMS** | Secure OAuth2 authentication and envelope encryption for sensitive resume & token data |
+| 1 | **Email & Ingestion Agent** | Connects to Gmail via Cloud Pub/Sub push. Parses recruiter emails, extracts interview dates, auto-updates Kanban stage in Cloud Firestore. |
+| 2 | **MINSKY (GitProof)** | Dual-path GitHub forensics: GPG/SSH commit signature verification + metadata heuristics (commit cadence, PR review history, AST language analysis). Outputs deterministic proof scores 0–100. |
+| 3 | **Career Optimization Agent** | Semantic gap analysis between your verified MINSKY badges and any job description. Delivers ATS keyword recommendations and match percentage. |
+| 4 | **Tracking Agent** | Serves the live Kanban board (`Applied → Screening → Interview → Offer`) synced in near-real-time from Cloud Firestore. Supports manual drag-and-drop overrides. |
+| 5 | **AI Drafting Agent** | Gemini 2.5 Flash generates evidence-backed cover letters and cold outreach messages using your verified GitHub proof metrics. |
+| 6 | **Scheduled Nudge Agent** | Dispatches time-sensitive interview prep alerts and recruiter follow-ups via Google Cloud Tasks queues. |
 
 ---
 
-## 💻 Tech Stack
+## GCP Stack
 
-- **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind CSS, Framer Motion, Lucide Icons, Sonner
+| Service | Role |
+|---|---|
+| **Gemini 2.5 Flash** (Vertex AI) | Agent reasoning, email parsing, semantic analysis, and cover letter generation |
+| **Cloud Pub/Sub** | Asynchronous Gmail webhook ingestion stream |
+| **Cloud Firestore** | Sub-second Kanban board sync and forensic metadata store |
+| **Cloud Tasks** | Queued background nudge dispatching (`signal-interview-alerts`, `signal-recruiter-followup`) |
+| **Cloud Run** | Scale-to-zero serverless container runtime for the FastAPI backend |
+
+---
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, TypeScript, Tailwind CSS, Framer Motion
 - **Backend**: Python 3.11, FastAPI, LangGraph, Pydantic v2
-- **AI / LLMs**: Google GenAI SDK (Gemini 2.5 Flash / Gemini 3 Flash), LangChain Google GenAI
-- **Database & Auth**: Cloud Firestore / Supabase PostgreSQL (Row Level Security)
+- **AI**: Google GenAI SDK, LangChain Google GenAI (Gemini 2.5 Flash)
+- **Database**: Cloud Firestore, Supabase (auth + PostgreSQL)
 
 ---
 
-## 🚀 Quickstart & Local Setup
+## Quickstart
 
-### 1. Clone the Repository
+### 1. Clone
+
 ```bash
-git clone https://github.com/Credo-Organization/credo2.git
-cd credo2
+git clone https://github.com/uselessdevloper/signal-.git
+cd signal-
 ```
 
-### 2. Frontend Setup (Next.js)
-```bash
-# Install dependencies
-npm install
+### 2. Backend (FastAPI + LangGraph)
 
-# Configure environment
-cp .env.example .env.local
-
-# Start Next.js development server
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) to access the landing page and navigate to `/dashboard/tracker` for the Multi-Agent Command Center.
-
-### 3. Backend Setup (FastAPI + LangGraph)
 ```bash
 cd backend
-
-# Create and activate virtual environment
 python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate
 
-# Install requirements
 pip install -r requirements.txt
 
-# Start FastAPI server
+cp .env.example .env
+# Add your GOOGLE_API_KEY to .env
+
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
-The API documentation is available at [http://localhost:8000/docs](http://localhost:8000/docs).
+
+API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### 3. Frontend (Next.js)
+
+```bash
+# From repo root
+npm install
+cp .env.example .env.local
+# Fill in your Supabase keys in .env.local
+
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Navigate to `/dashboard/tracker` for the Multi-Agent Command Center.
+
+### 4. Docker (Cloud Run ready)
+
+```bash
+cd backend
+docker build -t signal-backend .
+docker run -p 8000:8080 --env-file .env signal-backend
+```
 
 ---
 
-## 📡 Backend API Endpoints
+## API Endpoints
 
-- `POST /api/pipeline/run` — Executes the full 6-agent LangGraph workflow.
-- `POST /api/email/ingest` — Ingestion Agent endpoint for Pub/Sub recruiter email payloads.
-- `POST /api/minsky/audit` — MINSKY GitProof Code Forensics audit.
-- `POST /api/optimize/gap-analysis` — Career Optimization semantic gap analyzer.
-- `GET /api/kanban/state` — Tracking Agent Kanban board query.
-- `POST /api/draft/outreach` — AI Drafting Agent outreach generator.
-- `POST /api/nudge/schedule` — Scheduled Nudge Agent Cloud Tasks dispatcher.
+| Method | Path | Agent |
+|---|---|---|
+| `POST` | `/api/pipeline/run` | Full 6-agent LangGraph run |
+| `POST` | `/api/email/ingest` | Agent 1 — Pub/Sub email parser |
+| `POST` | `/api/minsky/audit` | Agent 2 — GitProof code forensics |
+| `POST` | `/api/optimize/gap-analysis` | Agent 3 — Semantic gap analysis |
+| `GET` | `/api/kanban/state` | Agent 4 — Live Kanban board |
+| `POST` | `/api/draft/outreach` | Agent 5 — AI cover letter + cold email |
+| `POST` | `/api/nudge/schedule` | Agent 6 — Cloud Tasks nudge scheduler |
