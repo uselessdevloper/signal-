@@ -23,7 +23,7 @@ export default function LoginPage() {
           <Shield className="h-7 w-7 text-primary-foreground" />
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Welcome to Credify</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Welcome to Signal</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Transform your skills into a verified passport
           </p>

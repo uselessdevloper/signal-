@@ -41,7 +41,7 @@ export default async function PublicPassportPage({ params }: PageProps) {
           <h1 className="text-xl font-semibold text-foreground mb-2">Passport Private</h1>
           <p className="text-sm text-muted-foreground mb-8">This user&apos;s skill passport is currently private or does not exist.</p>
           <Link href="/" className="text-sm text-primary hover:text-primary/80 font-medium transition-colors">
-            Build your own on Credify &rarr;
+            Build your own on Signal &rarr;
           </Link>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default async function PublicPassportPage({ params }: PageProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background transition-transform group-hover:scale-105">
               <Shield className="h-4 w-4" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-foreground">Credify</span>
+            <span className="text-lg font-bold tracking-tight text-foreground">Signal</span>
           </Link>
         </div>
         

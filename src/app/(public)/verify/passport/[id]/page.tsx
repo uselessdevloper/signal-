@@ -43,7 +43,7 @@ export default async function VerifyPassportPage({ params }: Props) {
     coursesCompleted: snap?.courses_completed || 14,
     skillsVerified: snap?.skills_verified || 12,
     certificatesEarned: snap?.certificates_earned || 3,
-    verificationUrl: snap?.verification_url || `https://credify.dev/verify/passport/${id}`,
+    verificationUrl: snap?.verification_url || `https://signal.dev/verify/passport/${id}`,
   };
 
   return (
@@ -56,14 +56,14 @@ export default async function VerifyPassportPage({ params }: Props) {
         <div className="flex flex-col items-center text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-semibold tracking-wide shadow-lg shadow-emerald-500/5">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Cryptographically Verified Credify Credential</span>
+            <span>Cryptographically Verified Signal Credential</span>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mt-2">
             Official Student Skill Passport
           </h1>
           <p className="text-sm text-zinc-400 max-w-md">
-            This verifiable passport is authenticated via Credify GitProof integrity checks and Ed25519-compatible proof signatures.
+            This verifiable passport is authenticated via Signal MINSKY code forensics and Ed25519-compatible proof signatures.
           </p>
         </div>
 
@@ -85,12 +85,12 @@ export default async function VerifyPassportPage({ params }: Props) {
 
           <div className="flex justify-between border-t border-[#1e2a4a] pt-2">
             <span className="text-zinc-500">DID Identifier</span>
-            <span className="font-mono text-zinc-300">did:cdy:{studentData.studentId}</span>
+            <span className="font-mono text-zinc-300">did:signal:{studentData.studentId}</span>
           </div>
 
           <div className="flex justify-between border-t border-[#1e2a4a] pt-2">
             <span className="text-zinc-500">Issuer Authority</span>
-            <span className="font-semibold text-white">Credify Global Trust Registry</span>
+            <span className="font-semibold text-white">Signal Global Trust Registry</span>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export default async function VerifyPassportPage({ params }: Props) {
           href="/"
           className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Credify Home
+          <ArrowLeft className="w-4 h-4" /> Back to Signal Home
         </Link>
       </div>
     </div>

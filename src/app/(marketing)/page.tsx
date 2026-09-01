@@ -120,26 +120,32 @@ function HeroSection() {
         {/* Headline */}
         <h1 className="flex flex-col items-center justify-center font-bold tracking-tight leading-[1.1] animate-fade-in-up">
           <span className="text-3xl sm:text-4xl md:text-5xl text-white mb-2 font-medium tracking-normal">
-            The Future of
+            Autonomous Multi-Agent
           </span>
-          <ShimmerText text="Skill Identity." className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl pb-2" />
+          <ShimmerText text="Career Intelligence." className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl pb-2" />
         </h1>
 
         {/* Subheadline */}
-        <p className="mt-6 text-lg sm:text-xl text-white max-w-2xl mx-auto leading-relaxed animate-fade-in-up [animation-delay:150ms]">
-          Turn GitHub activity, certifications, and achievements into an evidence-backed skill passport and find the right teammates.
+        <p className="mt-6 text-lg sm:text-xl text-white max-w-3xl mx-auto leading-relaxed animate-fade-in-up [animation-delay:150ms]">
+          Suppose you are a student ready for your career, but lost in the noise unsure, overwhelmed by application tracking, and facing silent ATS resume rejections. Don&apos;t worry — Signal is here for you.
         </p>
 
         {/* CTAs */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up [animation-delay:300ms]">
-          <StarButtonDemo />
+          <Link href="/dashboard/tracker" className="px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-lg">
+            <Zap className="w-4 h-4 text-black" />
+            Launch Multi-Agent Command Center
+          </Link>
+          <Link href="/dashboard" className="px-6 py-3 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-semibold hover:bg-zinc-800 transition-all flex items-center gap-2">
+            View Skill Passport
+          </Link>
         </div>
 
         {/* Hero visual — floating passport preview */}
         <div className="mt-20 animate-fade-in-up [animation-delay:600ms] relative max-w-4xl mx-auto">
           {/* Applying a mask-image to create a soft fade on the edges so it blends into the background */}
           <div className="relative mx-auto max-w-4xl [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)]">
-            <img src="/sample.png" alt="Skill Passport Preview" className="w-full h-auto block opacity-90" />
+            <img src="/sample.png" alt="Signal Multi-Agent & Skill Passport Preview" className="w-full h-auto block opacity-90" />
           </div>
         </div>
       </div>
@@ -154,13 +160,12 @@ function ProblemSection() {
   const heroCard = {
     title: (
       <span className="inline-flex items-center gap-2 flex-wrap">
-        <span>Your</span>
-        <SlicedText text="resume" className="text-muted-foreground" splitSpacing={2} />
-        <span>is</span>
-        <span>broken</span>
+        <span>Lost</span>
+        <SlicedText text="in the noise" className="text-muted-foreground" splitSpacing={2} />
+        <span>& ATS rejections?</span>
       </span>
     ),
-    description: "Students spend years building skills but have no credible way to prove them. Here's what's holding you back.",
+    description: "Suppose you are a student ready for your career, but overwhelmed by manual tracking and silent ATS drops. Here is how Signal solves it.",
   };
 
   const featureCards = [
@@ -403,8 +408,8 @@ function FeaturesSection() {
             </Highlighter>
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Credify combines AI analysis, evidence aggregation, and career intelligence
-            into one platform.
+            Signal combines multi-agent orchestration, evidence aggregation, and career intelligence
+            into one synchronized platform.
           </p>
         </div>
 
@@ -451,7 +456,7 @@ function DemoPreviewSection() {
             See your passport in action
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Here&apos;s what a Credify Skill Passport looks like — backed by real evidence from
+            Here&apos;s what a Signal Skill Passport looks like — backed by real evidence from
             your GitHub repos and certificates.
           </p>
         </div>
@@ -593,21 +598,21 @@ function TestimonialsSection() {
     {
       name: "Priya Sharma",
       role: "3rd Year CS, IIT Delhi",
-      text: "Credify showed me I had 12 verified skills I didn't even list on my resume. The passport got me shortlisted at 3 startups within a week.",
+      text: "Signal showed me I had 12 verified skills with proof badges I didn't even list on my resume. The passport and outreach agent got me shortlisted at 3 startups within a week.",
       avatar: "PS",
       color: "bg-pink-500",
     },
     {
       name: "Arjun Mehta",
       role: "Final Year, NIT Trichy",
-      text: "The gap analysis was eye-opening. I thought I knew full-stack, but I was missing key DevOps skills. The roadmap got me up to speed in 2 months.",
+      text: "The semantic gap analysis was eye-opening. The Career Optimization Agent detected my missing DevOps skills and gave me an actionable roadmap to pass ATS filters.",
       avatar: "AM",
       color: "bg-blue-500",
     },
     {
       name: "Sara Khan",
       role: "Fresher, Bangalore",
-      text: "Instead of sending a generic resume, I share my Credify passport. Recruiters can see real proof of my React and Node.js work. Night and day difference.",
+      text: "Instead of sending a generic resume, I share my Signal passport and live Kanban link. Recruiters can verify real proof of my React and Python work.",
       avatar: "SK",
       color: "bg-violet-500",
     },
@@ -625,7 +630,7 @@ function TestimonialsSection() {
             Loved by <span className="gradient-text">students</span> everywhere
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            See how students are using Credify to land internships and build credible profiles.
+            See how students are using Signal to land internships and build credible profiles.
           </p>
         </div>
 
