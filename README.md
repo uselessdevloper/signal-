@@ -1,80 +1,77 @@
-# 🎓 Credify: AI-Driven Verifiable Skill Passport
+# ⚡ Signal: Autonomous Multi-Agent Career Workflow & Code Forensics
 
-**Credify** is a next-generation career identity platform built for the **Smart India Hackathon (SIH)**. It bridges the gap between fragmented academic credentials and industry requirements by generating cryptographically secure, AI-verified "Skill Passports." 
-
-By connecting their GitHub profiles and uploading PDF certificates, users receive a verifiable portfolio. Our **Dual-Layer AI Orchestration Engine** then evaluates evidence integrity to prevent cheating, matches candidates to live job opportunities, and generates real-time AI roadmaps to close their skill gaps.
+> **Problem**: Suppose you are a student ready for your career, but lost in the noise, unsure, overwhelmed by manual application tracking, and facing silent ATS resume rejections. **Signal** orchestrates your complete career workflow with deterministic proof-of-skill forensics and an autonomous multi-agent pipeline.
 
 ---
 
-## 🌟 Key Features
+## 🎯 Architecture: 6-Agent LangGraph Pipeline
 
-* **🛡️ AI Anti-Cheat Verification**: Evaluates GitHub repositories to detect cloned projects, low-effort forks, or boilerplate code using structured LLM evaluations, ensuring high integrity of all verified skills.
-* **⚡ Background AI Queuing**: Employs an asynchronous state-machine architecture to process heavy AI tasks without hitting serverless (Vercel) timeouts.
-* **🧠 Multi-Agent Orchestration**: Uses a deterministic LangGraph state machine to extract skills and match them semantically to industry requirements.
-* **💼 Real-Time Opportunity Matching**: Uses custom in-memory vector embeddings (cosine similarity) to match a candidate's verified skill passport against real-world job taxonomy.
-* **🎨 Premium Glassmorphic UI**: Built with Next.js 14 and Framer Motion for a stunning, responsive, and deeply interactive user experience.
-
----
-
-## 🏗️ Enterprise Architecture 
-
-Credify operates on a robust, decoupled architecture separating a high-performance Next.js Edge UI from a heavyweight Python AI backend, connected via asynchronous background workers and a PostgreSQL database.
+Signal replaces static resumes and chaotic application spreadsheets with a synchronized multi-agent pipeline:
 
 ```mermaid
-graph TD
-    A[Next.js Client UI] -->|OAuth & Server Actions| B[Next.js API Layer]
-    B -->|Async Job Polling| C[(Supabase PostgreSQL)]
-    
-    subgraph Background Processing
-        C -->|Queue| D[Passport Worker API]
-        C -->|Queue| E[Matcher Worker API]
-    end
-    
-    subgraph AI Orchestration Layer
-        D -.-> F[Anti-Cheat Agent]
-        E -.-> G[FastAPI AI Microservice]
-        G --> H[LangGraph AI Coach]
-    end
+flowchart LR
+    PubSub[Cloud Pub/Sub: Gmail Events] --> Agent1[1. Email & Ingestion Agent]
+    Agent1 -->|Writes to Firestore| Agent4[4. Tracking Agent & Live Kanban]
+    Agent1 --> Agent2[2. MINSKY Code Forensics Agent]
+    Agent2 -->|Verified Proof Badges| Agent3[3. Career Optimization Agent]
+    Agent3 -->|Semantic ATS Alignment| Agent5[5. AI Drafting Agent]
+    Agent4 --> Agent6[6. Scheduled Nudge Agent via Cloud Tasks]
 ```
 
-### 1. Asynchronous Background Workers
-To handle long-running AI tasks and prevent serverless function timeouts (like Vercel's strict 10-second limit), Credify utilizes a robust state-machine queue system:
-* **`passport_jobs` and `match_jobs`**: Supabase tables that track the lifecycle (`pending`, `processing`, `completed`, `failed`) of heavy AI extractions.
-* **Non-Blocking UI**: The frontend polls these job tables in real-time, displaying beautiful progress indicators to the user while the heavy lifting happens invisibly in the background.
+### The 6 Agents
 
-### 2. Live Anti-Cheat & Evidence Verification
-Instead of blindly trusting resumes, Credify acts as a strict technical recruiter:
-* **Next.js Native OAuth**: Securely connects directly to GitHub to fetch raw repository metadata, languages, and README snippets.
-* **Anti-Cheat Agent**: Uses `@vercel/ai` and structured `zod` schemas to evaluate repositories in real-time. It flags low-effort clones or boilerplate code, ensuring only authentic, hard-earned skills make it to the Skill Passport.
+1. **Email & Ingestion Agent**
+   - Connects to Gmail via Cloud Pub/Sub push topics.
+   - Autonomously parses recruiter emails, interview invitations, stage updates, and interview dates/times.
+   - **Write-path**: Updates application documents in Cloud Firestore with sub-second latency.
 
-### 3. Pure Stateless AI Microservice (Python + LangGraph)
-The Python backend (`backend/main.py`) acts purely as a stateless orchestration engine:
-* **The Extractor Node**: Ingests unstructured data (PDF certificates) and uses **Gemini 2.5 Flash** to extract deterministic JSON arrays of verifiable skills.
-* **The Matcher Node (AI Coach)**: Employs a custom, ultra-fast `vector-store.ts` for in-memory cosine similarity, cross-referencing extracted skills against live industry job requirements without relying on heavy external vector databases.
+2. **MINSKY (GitProof Forensics Agent)**
+   - Audits GitHub repositories using a dual-path verification strategy:
+     - **Cryptographic Signatures**: Checks for GPG/SSH commit signatures where available (Yukawa potential term $\Phi$).
+     - **Deterministic Physics-Based Fallback**: When signatures are absent (common for student developers), verifies proof-of-skill via commit frequency over time (Relativistic Momentum $p$ with Lorentz burst damping $1/\gamma$), file distribution (Inertial Mass $M$), Poisson arrival distribution (Boltzmann Entropy $S$), PR review history (Carnot Efficiency $\eta$), and Stokes fork drag.
+   - Outputs deterministic, non-gameable proof scores (0–100) and verified badges.
+
+3. **Career Optimization Agent**
+   - Conducts semantic gap analysis between candidate's verified proof badges and target job descriptions.
+   - Identifies matching strengths, missing technical requirements, and delivers tailored ATS optimization guidance.
+
+4. **Tracking Agent**
+   - Serves and renders the live real-time Kanban board across `Applied`, `Screening`, `Interview`, `Offer`, and `Rejected` stages.
+   - Supports manual user drag-and-drop overrides and status management.
+
+5. **AI Drafting Agent**
+   - Generates personalized, evidence-backed cover letters, cold outreach messages, and follow-up templates referencing verified GitHub proof metrics.
+   - Powered by Gemini 2.5 Flash / Gemini 3 Flash.
+
+6. **Scheduled Nudge Agent**
+   - Dispatches automated, time-sensitive follow-up reminders and interview preparation alerts.
+   - Orchestrated via Google Cloud Tasks queues (`signal-interview-alerts`, `signal-recruiter-followup`).
 
 ---
 
-## 🗄️ Database Schema Overview (Supabase PostgreSQL)
+## ☁️ Google Cloud Platform (GCP) Stack
 
-Credify relies on a strictly relational schema secured by Row Level Security (RLS):
-
-* **`passports` & `skills`**: Stores the user's generated passport snapshots and canonical skill mapping.
-* **`github_connections` & `github_repos`**: Stores OAuth metadata and repository stats (stars, size, language).
-* **`evidence` & `evidence_claims`**: Ties every verified skill back to an immutable source (a specific GitHub repo or uploaded certificate).
-* **`passport_jobs` & `match_jobs`**: The async task queues that the Next.js API polling workers rely upon.
+| Component | Service | Role |
+|---|---|---|
+| **Agent Reasoning & Drafting** | **Gemini 2.5 Flash / Gemini 3 Flash** (Vertex AI) | High-speed multi-agent semantic analysis, parsing, and outreach generation |
+| **Recruiter Ingestion** | **Cloud Pub/Sub** | Asynchronous ingestion stream for inbound Gmail webhook push events |
+| **Live Kanban State** | **Cloud Firestore** | Sub-second near real-time document sync and forensic metadata storage |
+| **Background Nudge Queues** | **Cloud Tasks** | Time-delayed queue execution for automated follow-up reminders |
+| **Container Compute** | **Cloud Run** | Pay-per-use, scale-to-zero serverless container runtime (minimal idle cost) |
+| **Auth & Security** | **Identity Platform + Cloud KMS** | Secure OAuth2 authentication and envelope encryption for sensitive resume & token data |
 
 ---
 
 ## 💻 Tech Stack
 
-* **Frontend**: [Next.js 14](https://nextjs.org/) (App Router), TypeScript, Tailwind CSS, shadcn/ui, Framer Motion
-* **AI Orchestration Backend**: Python 3.11, [FastAPI](https://fastapi.tiangolo.com/), [LangGraph](https://langchain-ai.github.io/langgraph/)
-* **AI SDKs**: Vercel AI SDK (`@vercel/ai`) for Anti-Cheat, Google GenAI SDK for Extractor
-* **Database & Auth**: [Supabase](https://supabase.com/) (PostgreSQL + RLS)
+- **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind CSS, Framer Motion, Lucide Icons, Sonner
+- **Backend**: Python 3.11, FastAPI, LangGraph, Pydantic v2
+- **AI / LLMs**: Google GenAI SDK (Gemini 2.5 Flash / Gemini 3 Flash), LangChain Google GenAI
+- **Database & Auth**: Cloud Firestore / Supabase PostgreSQL (Row Level Security)
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## 🚀 Quickstart & Local Setup
 
 ### 1. Clone the Repository
 ```bash
@@ -82,62 +79,43 @@ git clone https://github.com/Credo-Organization/credo2.git
 cd credo2
 ```
 
-### 2. Configure the Frontend (Next.js)
-
-Navigate to the project root and install dependencies:
+### 2. Frontend Setup (Next.js)
 ```bash
+# Install dependencies
 npm install
-```
 
-Create a `.env.local` file in the root directory and add the following keys:
-```env
-# Database Config
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key # Used for backend administrative tasks
+# Configure environment
+cp .env.example .env.local
 
-# GitHub OAuth Integration
-GITHUB_CLIENT_ID=your_github_client_id
-GITHUB_CLIENT_SECRET=your_github_client_secret
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# AI Configuration (Anti-Cheat / Fast Embeddings)
-XAI_API_KEY=your_xai_api_key
-```
-
-Run the database migrations to set up the background queues and tables:
-```bash
-node scripts/migrate.js
-```
-
-Start the frontend development server:
-```bash
+# Start Next.js development server
 npm run dev
 ```
-The frontend will be available at `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000) to access the landing page and navigate to `/dashboard/tracker` for the Multi-Agent Command Center.
 
-### 3. Configure the AI Microservice (FastAPI)
-
-Open a **new terminal tab** and navigate to the backend directory:
+### 3. Backend Setup (FastAPI + LangGraph)
 ```bash
 cd backend
-python -m venv venv
-source venv/Scripts/activate  # On Windows: venv\Scripts\activate
+
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install requirements
 pip install -r requirements.txt
-```
 
-Create a `.env` file inside the `/backend` directory:
-```env
-GEMINI_API_KEY=your_gemini_api_key
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_service_role_key
-```
-
-Start the Python backend:
-```bash
+# Start FastAPI server
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
-The backend API will run on `http://localhost:8000`.
+The API documentation is available at [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ---
-*Designed & Engineered for the Smart India Hackathon.*
+
+## 📡 Backend API Endpoints
+
+- `POST /api/pipeline/run` — Executes the full 6-agent LangGraph workflow.
+- `POST /api/email/ingest` — Ingestion Agent endpoint for Pub/Sub recruiter email payloads.
+- `POST /api/minsky/audit` — MINSKY GitProof Code Forensics audit.
+- `POST /api/optimize/gap-analysis` — Career Optimization semantic gap analyzer.
+- `GET /api/kanban/state` — Tracking Agent Kanban board query.
+- `POST /api/draft/outreach` — AI Drafting Agent outreach generator.
+- `POST /api/nudge/schedule` — Scheduled Nudge Agent Cloud Tasks dispatcher.
