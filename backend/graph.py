@@ -32,9 +32,7 @@ from langgraph.graph import StateGraph, START, END
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 
-# ---------------------------------------------------------------------------
 # State Definition
-# ---------------------------------------------------------------------------
 class SignalState(TypedDict):
     # Ingestion / Application Context
     inbound_email: Optional[Dict[str, Any]]
@@ -60,9 +58,7 @@ class SignalState(TypedDict):
     errors: List[str]
 
 
-# ---------------------------------------------------------------------------
 # Helper: LLM Initializer (Using Gemini 2.5 Flash / Gemini 3 Flash / Fallbacks)
-# ---------------------------------------------------------------------------
 def get_gemini_llm(model_name: str = "gemini-2.5-flash", temperature: float = 0.2):
     google_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
     if google_key and google_key != "mock_key_for_now":
@@ -90,9 +86,7 @@ def get_gemini_llm(model_name: str = "gemini-2.5-flash", temperature: float = 0.
     return None
 
 
-# ---------------------------------------------------------------------------
 # 1. Email & Ingestion Agent (Pub/Sub -> Inbound Parser -> Firestore Write)
-# ---------------------------------------------------------------------------
 class EmailParsedSchema(BaseModel):
     company: str = Field(description="Name of the hiring company")
     role: str = Field(description="Job role or internship title")
@@ -173,9 +167,7 @@ Extract company, role, stage (one of: Applied, Screening, Interview, Offer, Reje
     }
 
 
-# ---------------------------------------------------------------------------
 # 2. MINSKY (GitProof Agent - Code Forensics & Deterministic Proof)
-# ---------------------------------------------------------------------------
 def minsky_forensics_agent(state: SignalState) -> Dict[str, Any]:
     print("--- [Agent 2] MINSKY (GitProof Code Forensics Agent) ---")
     github_token = state.get("github_token")
@@ -242,9 +234,7 @@ def minsky_forensics_agent(state: SignalState) -> Dict[str, Any]:
     return {"minsky_forensics": minsky_result}
 
 
-# ---------------------------------------------------------------------------
 # 3. Career Optimization Agent (Semantic Gap Analysis & ATS Alignment)
-# ---------------------------------------------------------------------------
 class OptimizationSchema(BaseModel):
     match_score: int = Field(description="Match percentage from 0-100")
     key_strengths: List[str] = Field(description="Verified candidate strengths matching JD")
@@ -303,9 +293,7 @@ Perform semantic gap analysis, compute match score, identify matched strengths, 
     return {"career_optimization": opt_result}
 
 
-# ---------------------------------------------------------------------------
 # 4. Tracking Agent (Real-Time Kanban State Serve & User Override Handler)
-# ---------------------------------------------------------------------------
 def tracking_agent(state: SignalState) -> Dict[str, Any]:
     print("--- [Agent 4] Tracking Agent (Kanban Serve & Live Board State) ---")
     ingestion = state.get("ingestion_result", {}).get("parsed", {})
@@ -354,9 +342,7 @@ def tracking_agent(state: SignalState) -> Dict[str, Any]:
     }
 
 
-# ---------------------------------------------------------------------------
 # 5. AI Drafting Agent (Personalized, Evidence-Backed Outreach Generator)
-# ---------------------------------------------------------------------------
 class DraftingSchema(BaseModel):
     subject_line: str = Field(description="High open-rate cold email or follow-up subject")
     cover_letter: str = Field(description="Evidence-backed personalized cover letter referencing verified skills")
@@ -398,9 +384,7 @@ Make it authentic, specific, concise, and non-generic."""
     return {"drafted_outreach": draft_result}
 
 
-# ---------------------------------------------------------------------------
 # 6. Scheduled Nudge Agent (Cloud Tasks Follow-Up & Prep Dispatcher)
-# ---------------------------------------------------------------------------
 def scheduled_nudge_agent(state: SignalState) -> Dict[str, Any]:
     print("--- [Agent 6] Scheduled Nudge Agent (Cloud Tasks Automation) ---")
     company = state.get("company", "Acme Corp")
@@ -435,9 +419,7 @@ def scheduled_nudge_agent(state: SignalState) -> Dict[str, Any]:
     return {"scheduled_nudges": nudges}
 
 
-# ---------------------------------------------------------------------------
 # Build the LangGraph Orchestration Pipeline
-# ---------------------------------------------------------------------------
 workflow = StateGraph(SignalState)
 
 # Add all 6 Agent Nodes

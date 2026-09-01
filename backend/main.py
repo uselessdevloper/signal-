@@ -67,9 +67,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------------------------------------------------------------------
 # Request Schemas
-# ---------------------------------------------------------------------------
 class PipelineRunRequest(BaseModel):
     inbound_email: Optional[Dict[str, Any]] = None
     company: Optional[str] = "TechCorp"
@@ -105,9 +103,7 @@ class NudgeScheduleRequest(BaseModel):
     interview_date: Optional[str] = None
 
 
-# ---------------------------------------------------------------------------
 # Root & Health Check
-# ---------------------------------------------------------------------------
 @app.get("/")
 def read_root():
     return {
@@ -141,9 +137,7 @@ def read_root():
     }
 
 
-# ---------------------------------------------------------------------------
 # 1. Full LangGraph Multi-Agent Orchestration Run
-# ---------------------------------------------------------------------------
 @app.post("/api/pipeline/run")
 def run_full_pipeline(req: PipelineRunRequest):
     try:
@@ -187,9 +181,7 @@ def run_full_pipeline(req: PipelineRunRequest):
         )
 
 
-# ---------------------------------------------------------------------------
 # 2. Email & Ingestion Agent Endpoint
-# ---------------------------------------------------------------------------
 @app.post("/api/email/ingest")
 def ingest_email_pubsub(req: EmailIngestRequest):
     from graph import email_ingestion_agent
@@ -206,9 +198,7 @@ def ingest_email_pubsub(req: EmailIngestRequest):
     return {"success": True, "data": result}
 
 
-# ---------------------------------------------------------------------------
 # 3. MINSKY Forensics Endpoint
-# ---------------------------------------------------------------------------
 @app.post("/api/minsky/audit")
 def minsky_audit(req: MinskyAuditRequest):
     from graph import minsky_forensics_agent
@@ -221,9 +211,7 @@ def minsky_audit(req: MinskyAuditRequest):
     return {"success": True, "data": result}
 
 
-# ---------------------------------------------------------------------------
 # 4. Career Optimization (Semantic Gap Analysis) Endpoint
-# ---------------------------------------------------------------------------
 @app.post("/api/optimize/gap-analysis")
 def optimize_gap_analysis(req: GapAnalysisRequest):
     from graph import career_optimization_agent
@@ -237,9 +225,7 @@ def optimize_gap_analysis(req: GapAnalysisRequest):
     return {"success": True, "data": result}
 
 
-# ---------------------------------------------------------------------------
 # 5. Tracking Agent (Kanban State & Overrides)
-# ---------------------------------------------------------------------------
 @app.get("/api/kanban/state")
 def get_kanban_state():
     from graph import tracking_agent
@@ -248,9 +234,7 @@ def get_kanban_state():
     return {"success": True, "data": result.get("kanban_state")}
 
 
-# ---------------------------------------------------------------------------
 # 6. AI Drafting Agent Endpoint
-# ---------------------------------------------------------------------------
 @app.post("/api/draft/outreach")
 def generate_drafted_outreach(req: DraftingRequest):
     from graph import ai_drafting_agent
@@ -265,9 +249,7 @@ def generate_drafted_outreach(req: DraftingRequest):
     return {"success": True, "data": result.get("drafted_outreach")}
 
 
-# ---------------------------------------------------------------------------
 # 7. Scheduled Nudge Agent Endpoint
-# ---------------------------------------------------------------------------
 @app.post("/api/nudge/schedule")
 def schedule_nudges(req: NudgeScheduleRequest):
     from graph import scheduled_nudge_agent
@@ -280,9 +262,7 @@ def schedule_nudges(req: NudgeScheduleRequest):
     return {"success": True, "data": result.get("scheduled_nudges")}
 
 
-# ---------------------------------------------------------------------------
 # Verifiable Credential Verification
-# ---------------------------------------------------------------------------
 @app.post("/api/credentials/verify")
 def verify_vc(payload: dict = Body(...)):
     try:

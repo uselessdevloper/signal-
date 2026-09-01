@@ -34,9 +34,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-// ---------------------------------------------------------------------------
 // Types & Initial Data
-// ---------------------------------------------------------------------------
 type Stage = "Applied" | "Screening" | "Interview" | "Offer" | "Rejected";
 
 interface KanbanCard {

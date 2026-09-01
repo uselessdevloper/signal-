@@ -100,9 +100,6 @@ import { StackedFeatureCards } from "@/components/unlumen-ui/stacked-feature-car
 import SlicedText from "@/components/ui/sliced-text";
 import Marquee from "@/components/animata/container/marquee";
 
-/* ═══════════════════════════════════════════
-   SECTION 1 — HERO
-   ═══════════════════════════════════════════ */
 function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
@@ -153,9 +150,6 @@ function HeroSection() {
   );
 }
 
-/* ═══════════════════════════════════════════
-   SECTION 2 — PROBLEM
-   ═══════════════════════════════════════════ */
 function ProblemSection() {
   const heroCard = {
     title: (
@@ -224,9 +218,6 @@ function ProblemSection() {
   );
 }
 
-/* ═══════════════════════════════════════════
-   SECTION 3 — HOW IT WORKS
-   ═══════════════════════════════════════════ */
 function HowItWorksSection() {
   const lineRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -356,9 +347,6 @@ function HowItWorksSection() {
 
 
 
-/* ═══════════════════════════════════════════
-   SECTION 4 — FEATURES
-   ═══════════════════════════════════════════ */
 function FeaturesSection() {
   const features = [
     {
@@ -438,9 +426,6 @@ function FeaturesSection() {
   );
 }
 
-/* ═══════════════════════════════════════════
-   SECTION 5 — DEMO PREVIEW
-   ═══════════════════════════════════════════ */
 function DemoPreviewSection() {
   return (
     <section id="preview" className="py-24 sm:py-32 relative overflow-hidden">
@@ -590,9 +575,6 @@ function FullPassportPreview() {
   );
 }
 
-/* ═══════════════════════════════════════════
-   SECTION 6 — TESTIMONIALS
-   ═══════════════════════════════════════════ */
 function TestimonialsSection() {
   const testimonials = [
     {

@@ -14,9 +14,7 @@
 
 const BACKEND_URL = process.env.BACKEND_API_URL || "http://localhost:8000";
 
-// ---------------------------------------------------------------------------
 // 1. Email & Ingestion Agent
-// ---------------------------------------------------------------------------
 export async function runEmailIngestionAgent(payload: {
   sender: string;
   subject: string;
@@ -69,9 +67,7 @@ export async function runEmailIngestionAgent(payload: {
   };
 }
 
-// ---------------------------------------------------------------------------
 // 2. MINSKY (GitProof Agent - Code Forensics)
-// ---------------------------------------------------------------------------
 export async function runMinskyForensicsAgent(payload: {
   github_token?: string;
   github_username?: string;
@@ -117,9 +113,7 @@ export async function runMinskyForensicsAgent(payload: {
   };
 }
 
-// ---------------------------------------------------------------------------
 // 3. Career Optimization Agent
-// ---------------------------------------------------------------------------
 export async function runCareerOptimizationAgent(payload: {
   job_description: string;
   verified_skills?: string[];
@@ -164,9 +158,7 @@ export async function runCareerOptimizationAgent(payload: {
   };
 }
 
-// ---------------------------------------------------------------------------
 // 4. Tracking Agent (Kanban Serve & Override Handler)
-// ---------------------------------------------------------------------------
 export async function getKanbanBoardState() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/kanban/state`, {
@@ -197,9 +189,7 @@ export async function getKanbanBoardState() {
   };
 }
 
-// ---------------------------------------------------------------------------
 // 5. AI Drafting Agent
-// ---------------------------------------------------------------------------
 export async function runAIDraftingAgent(payload: {
   company: string;
   role: string;
@@ -232,9 +222,7 @@ export async function runAIDraftingAgent(payload: {
   };
 }
 
-// ---------------------------------------------------------------------------
 // 6. Scheduled Nudge Agent (Cloud Tasks)
-// ---------------------------------------------------------------------------
 export async function runScheduledNudgeAgent(payload: {
   company: string;
   role: string;
@@ -283,9 +271,7 @@ export async function runScheduledNudgeAgent(payload: {
   };
 }
 
-// ---------------------------------------------------------------------------
 // End-to-End Multi-Agent Pipeline Execution
-// ---------------------------------------------------------------------------
 export async function runFullSignalPipeline(payload: {
   inbound_email?: any;
   company?: string;
