@@ -68,7 +68,7 @@ def _extract_json_object(raw_text: str) -> Optional[dict]:
 
 
 class LLMClient:
-    GEMINI_MODELS = ["gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash"]
+    GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3-flash", "gemini-flash-latest"]
     GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
     NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
