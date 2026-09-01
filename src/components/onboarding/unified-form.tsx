@@ -89,7 +89,7 @@ export function UnifiedOnboardingForm() {
 
     const popup = window.open(
       "/api/auth/github",
-      "Credify_GitHub_Auth",
+      "Signal_GitHub_Auth",
       `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
     );
 
@@ -98,12 +98,12 @@ export function UnifiedOnboardingForm() {
         window.removeEventListener("message", messageHandler);
         setAuthLogin(event.data.login || "developer");
         setIsScanModalOpen(true);
-        setSyncStatus("Connected! Running GitProof deep scan across your account...");
+        setSyncStatus("Connected! Running MINSKY deep scan across your account...");
 
         try {
           const syncRes = await syncGitHub(event.data.login, event.data.token);
           if (syncRes.success) {
-            setSyncStatus("GitProof scan completed! Advancing...");
+            setSyncStatus("MINSKY scan completed! Advancing...");
           } else {
             setGithubError(syncRes.error || "Failed to scan GitHub repositories.");
           }
@@ -116,7 +116,7 @@ export function UnifiedOnboardingForm() {
         window.removeEventListener("message", messageHandler);
         setGithubError(
           event.data.error === "incorrect_client_credentials"
-            ? "GitHub configuration error: Invalid Client Secret. Please verify Credify settings."
+            ? "GitHub configuration error: Invalid Client Secret. Please verify Signal settings."
             : event.data.error || "Authentication was cancelled."
         );
         setIsConnecting(false);

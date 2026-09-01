@@ -192,7 +192,7 @@ export default async function DashboardPage() {
         coursesCompleted: snap.courses_completed || totalRepos || 14,
         skillsVerified: snap.skills_verified || (snap.skills || []).length || 12,
         certificatesEarned: snap.certificates_earned || (certs || []).length || 3,
-        verificationUrl: snap.verification_url || `https://credify.dev/verify/passport/${studentId}`
+        verificationUrl: snap.verification_url || `https://signal.dev/verify/passport/${studentId}`
       };
     }
   }
@@ -205,7 +205,7 @@ export default async function DashboardPage() {
           <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
             <UserCircle className="w-10 h-10 text-white/60" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-white mb-3">Welcome to Credify</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-white mb-3">Welcome to Signal</h2>
           <p className="text-white/60 max-w-md mx-auto text-lg leading-relaxed mb-8">
             Click below to generate your official Student ID Passport & GitProof audit.
           </p>

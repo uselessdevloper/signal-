@@ -35,8 +35,8 @@ function BarcodeSVG({ value, height = 40, className }: { value: string; height?:
   );
 }
 
-// --- Credify Holographic Circular Verification Seal ---
-function CredifyVerificationSeal() {
+// --- Signal Holographic Circular Verification Seal ---
+function SignalVerificationSeal() {
   return (
     <div className="relative w-28 h-28 flex items-center justify-center select-none">
       {/* Outer Rotated Badge SVG with Text on Path */}
@@ -62,7 +62,7 @@ function CredifyVerificationSeal() {
         {/* Text Along Path */}
         <text fontSize="7.5" fontWeight="bold" letterSpacing="2.5" fill="#0b2559">
           <textPath href="#sealCircleTop" startOffset="50%" textAnchor="middle">
-            ★ CREDIFY VERIFIED ★
+            ★ SIGNAL VERIFIED ★
           </textPath>
         </text>
 
@@ -72,7 +72,7 @@ function CredifyVerificationSeal() {
           </textPath>
         </text>
 
-        {/* Inner Double-C Monogram Emblem */}
+        {/* Inner Double Monogram Emblem */}
         <g transform="translate(42, 42) scale(0.6)">
           <path
             d="M 40 10 L 20 10 C 10 10 5 15 5 25 L 5 35 C 5 45 10 50 20 50 L 40 50 L 40 42 L 20 42 C 15 42 13 40 13 35 L 13 25 C 13 20 15 18 20 18 L 40 18 Z"
@@ -122,13 +122,13 @@ export interface StudentPassportProps {
 }
 
 export function StudentPassportIdCard({ studentData, className }: StudentPassportProps) {
-  const cardId = studentData?.cardId || "CDY2025-000742";
-  const studentId = studentData?.studentId || "CDY25S7421";
+  const cardId = studentData?.cardId || "SIG2026-000742";
+  const studentId = studentData?.studentId || "SIG26S7421";
   const name = studentData?.name || "Jane Doe";
   const gender = studentData?.gender || "Female";
   const degree = studentData?.degree || "B.Tech – Computer Science Engineering";
-  const issueDate = studentData?.issueDate || "18 MAY 2025";
-  const expiryDate = studentData?.expiryDate || "17 MAY 2027";
+  const issueDate = studentData?.issueDate || "18 MAY 2026";
+  const expiryDate = studentData?.expiryDate || "17 MAY 2028";
   const coursesCompleted = studentData?.coursesCompleted ?? 14;
   const skillsVerified = studentData?.skillsVerified ?? 12;
   const certificatesEarned = studentData?.certificatesEarned ?? 3;
@@ -137,7 +137,7 @@ export function StudentPassportIdCard({ studentData, className }: StudentPasspor
     studentData?.verificationUrl ||
     (typeof window !== "undefined"
       ? `${window.location.origin}/verify/passport/${studentId}`
-      : `https://credify.dev/verify/passport/${studentId}`);
+      : `https://signal.dev/verify/passport/${studentId}`);
 
   // Default Illustrated Female Avatar if none provided
   const avatarUrl =
@@ -205,7 +205,7 @@ export function StudentPassportIdCard({ studentData, className }: StudentPasspor
 
         {/* Verification Seal */}
         <div className="flex items-center justify-center">
-          <CredifyVerificationSeal />
+          <SignalVerificationSeal />
         </div>
       </div>
 
