@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import Link from "next/link";
 import {
   Zap,
@@ -17,79 +17,103 @@ import {
   Cpu,
   Bot,
   AlertTriangle,
-  CheckCircle2,
-  ChevronDown,
-  Layers,
   FileCheck2,
 } from "lucide-react";
 
-export default function GhostLandingPage() {
-  const [page, setPage] = useState<1 | 2 | 3>(1);
-  const [isKeyPressed, setIsKeyPressed] = useState(false);
-  const [taglineIndex, setTaglineIndex] = useState(0);
-  const [headlineIndex, setHeadlineIndex] = useState(0);
-  const isTransitioningRef = useRef(false);
-  const docScrollRef = useRef<HTMLDivElement>(null);
-  const wheelAccumulatorRef = useRef(0);
-
+// Isolated Tagline Rotator (zero re-render of parent stage)
+const TaglineRotator = memo(function TaglineRotator() {
   const TAGLINES = [
     "TRACK 03 · AUTONOMOUS AI JOB APPLICATION TRACKER",
     "6-AGENT LANGGRAPH PIPELINE ON GOOGLE CLOUD",
     "EMAIL PARSING · MINSKY GITPROOF · REAL-TIME KANBAN",
     "GEMINI 2.5 FLASH · CLOUD PUB/SUB · CLOUD FIRESTORE",
   ];
+  const [index, setIndex] = useState(0);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % TAGLINES.length);
+    }, 3800);
+    return () => clearInterval(interval);
+  }, [TAGLINES.length]);
+
+  return <p className="ghost-typing tracking-widest">{TAGLINES[index]}</p>;
+});
+
+// Isolated Headline Rotator (zero re-render of parent stage)
+const HeadlineRotator = memo(function HeadlineRotator({ isActive }: { isActive: boolean }) {
   const HEADLINES = [
     { line1: "tracks every", line2: "job application." },
     { line1: "parses recruiter", line2: "emails autonomously." },
     { line1: "verifies github", line2: "proof of skill." },
     { line1: "defeats silent", line2: "ats resume filters." },
   ];
+  const [index, setIndex] = useState(0);
 
-  // Tagline rotation
   useEffect(() => {
+    if (!isActive) return;
     const interval = setInterval(() => {
-      setTaglineIndex((prev) => (prev + 1) % TAGLINES.length);
-    }, 3800);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Headline rotation on Page 2
-  useEffect(() => {
-    if (page !== 2) return;
-    const interval = setInterval(() => {
-      setHeadlineIndex((prev) => (prev + 1) % HEADLINES.length);
+      setIndex((prev) => (prev + 1) % HEADLINES.length);
     }, 2800);
     return () => clearInterval(interval);
-  }, [page]);
+  }, [isActive, HEADLINES.length]);
+
+  return (
+    <>
+      <p
+        className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight leading-tight text-white/80 transition-opacity duration-300"
+        style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+      >
+        {HEADLINES[index].line1}
+      </p>
+      <p
+        className="text-4xl sm:text-6xl md:text-7xl font-medium tracking-tight leading-tight text-white mt-1 transition-opacity duration-300"
+        style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+      >
+        {HEADLINES[index].line2}
+      </p>
+    </>
+  );
+});
+
+export default function GhostLandingPage() {
+  const [page, setPage] = useState<1 | 2 | 3>(1);
+  const [isKeyPressed, setIsKeyPressed] = useState(false);
+  const isTransitioningRef = useRef(false);
+  const docScrollRef = useRef<HTMLDivElement>(null);
+  const wheelAccumulatorRef = useRef(0);
 
   const advancePage = useCallback(() => {
     if (isTransitioningRef.current) return;
     isTransitioningRef.current = true;
     setIsKeyPressed(true);
-    setTimeout(() => setIsKeyPressed(false), 220);
+    setTimeout(() => setIsKeyPressed(false), 150);
 
-    setPage((curr) => (curr < 3 ? ((curr + 1) as 1 | 2 | 3) : 3));
+    requestAnimationFrame(() => {
+      setPage((curr) => (curr < 3 ? ((curr + 1) as 1 | 2 | 3) : 3));
+    });
 
     setTimeout(() => {
       isTransitioningRef.current = false;
       wheelAccumulatorRef.current = 0;
-    }, 650);
+    }, 450);
   }, []);
 
   const previousPage = useCallback(() => {
     if (isTransitioningRef.current) return;
     isTransitioningRef.current = true;
 
-    setPage((curr) => (curr > 1 ? ((curr - 1) as 1 | 2 | 3) : 1));
+    requestAnimationFrame(() => {
+      setPage((curr) => (curr > 1 ? ((curr - 1) as 1 | 2 | 3) : 1));
+    });
 
     setTimeout(() => {
       isTransitioningRef.current = false;
       wheelAccumulatorRef.current = 0;
-    }, 650);
+    }, 450);
   }, []);
 
-  // Keyboard navigation
+  // Instant Keydown Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -109,46 +133,45 @@ export default function GhostLandingPage() {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, { passive: false });
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [page, advancePage, previousPage]);
 
-  // Smooth Wheel navigation with delta accumulator
+  // Zero-Latency Wheel Navigation
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (isTransitioningRef.current) return;
 
       wheelAccumulatorRef.current += e.deltaY;
 
-      if (page === 1 && wheelAccumulatorRef.current > 35) {
+      if (page === 1 && wheelAccumulatorRef.current > 25) {
         wheelAccumulatorRef.current = 0;
         advancePage();
       } else if (page === 2) {
-        if (wheelAccumulatorRef.current > 35) {
+        if (wheelAccumulatorRef.current > 25) {
           wheelAccumulatorRef.current = 0;
           advancePage();
-        } else if (wheelAccumulatorRef.current < -35) {
+        } else if (wheelAccumulatorRef.current < -25) {
           wheelAccumulatorRef.current = 0;
           previousPage();
         }
       } else if (page === 3 && docScrollRef.current) {
-        if (docScrollRef.current.scrollTop <= 0 && wheelAccumulatorRef.current < -60) {
+        if (docScrollRef.current.scrollTop <= 0 && wheelAccumulatorRef.current < -45) {
           wheelAccumulatorRef.current = 0;
           previousPage();
         }
       }
 
-      // Natural decay of accumulator
       setTimeout(() => {
         wheelAccumulatorRef.current = 0;
-      }, 400);
+      }, 300);
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true });
     return () => window.removeEventListener("wheel", handleWheel);
   }, [page, advancePage, previousPage]);
 
-  // Touch navigation
+  // Touch Navigation
   useEffect(() => {
     let startY = 0;
 
@@ -158,11 +181,11 @@ export default function GhostLandingPage() {
 
     const handleTouchEnd = (e: TouchEvent) => {
       const deltaY = startY - e.changedTouches[0].clientY;
-      if (Math.abs(deltaY) < 45) return;
+      if (Math.abs(deltaY) < 35) return;
 
-      if (deltaY > 45 && page < 3) {
+      if (deltaY > 35 && page < 3) {
         advancePage();
-      } else if (deltaY < -45 && (page === 2 || (page === 3 && docScrollRef.current?.scrollTop === 0))) {
+      } else if (deltaY < -35 && (page === 2 || (page === 3 && docScrollRef.current?.scrollTop === 0))) {
         previousPage();
       }
     };
@@ -204,10 +227,10 @@ export default function GhostLandingPage() {
       </svg>
 
       <div id="stage" className="ghost-stage">
-        {/* Vertical Gradient Wash */}
+        {/* Hardware-Accelerated Gradient Wash */}
         <div id="gradient-wash" className="ghost-gradient-wash" aria-hidden="true" />
 
-        {/* CRT Scanline & Vignette Overlays */}
+        {/* Lightweight CRT & Vignette */}
         <div className="ghost-tv-lines" aria-hidden="true" />
         <div className="ghost-vignette" aria-hidden="true" />
 
@@ -224,7 +247,7 @@ export default function GhostLandingPage() {
           </button>
 
           <div className="ghost-tagline">
-            <p className="ghost-typing tracking-widest">{TAGLINES[taglineIndex]}</p>
+            <TaglineRotator />
           </div>
         </div>
 
@@ -236,15 +259,6 @@ export default function GhostLandingPage() {
         >
           <div className="flex flex-col items-center">
             <div className="relative group cursor-pointer">
-              {/* Glow Layer */}
-              <h1
-                className="text-[92px] sm:text-[135px] md:text-[175px] font-black tracking-tighter leading-none text-white blur-xl opacity-60 absolute inset-0 select-none"
-                style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
-              >
-                SIGNAL
-              </h1>
-
-              {/* Main Vector Face */}
               <h1
                 className="relative text-[92px] sm:text-[135px] md:text-[175px] font-black tracking-tighter leading-none select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.35)]"
                 style={{
@@ -268,8 +282,8 @@ export default function GhostLandingPage() {
             PAGE 1: Hero Landing
             ═══════════════════════════════════════════════ */}
         <section
-          className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            page === 1 ? "opacity-100 visible pointer-events-auto scale-100" : "opacity-0 invisible pointer-events-none scale-95"
+          className={`absolute inset-0 transition-all duration-500 ease-out ${
+            page === 1 ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"
           }`}
         >
           <div className="ghost-cta">
@@ -293,23 +307,12 @@ export default function GhostLandingPage() {
             PAGE 2: Dynamic Problem/Action Headline
             ═══════════════════════════════════════════════ */}
         <section
-          className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            page === 2 ? "opacity-100 visible pointer-events-auto scale-100" : "opacity-0 invisible pointer-events-none scale-95"
+          className={`absolute inset-0 transition-all duration-500 ease-out ${
+            page === 2 ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"
           }`}
         >
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white select-none w-full max-w-3xl px-4">
-            <p
-              className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight leading-tight text-white/80"
-              style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
-            >
-              {HEADLINES[headlineIndex].line1}
-            </p>
-            <p
-              className="text-4xl sm:text-6xl md:text-7xl font-medium tracking-tight leading-tight text-white mt-1"
-              style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
-            >
-              {HEADLINES[headlineIndex].line2}
-            </p>
+            <HeadlineRotator isActive={page === 2} />
             <p className="mt-6 text-white/70 font-mono text-xs sm:text-sm tracking-wider uppercase max-w-xl mx-auto">
               LangGraph Multi-Agent Orchestration · 6 Agents · Google Cloud
             </p>
@@ -336,14 +339,14 @@ export default function GhostLandingPage() {
             PAGE 3: Blueprint Manifesto & Document Scroll
             ═══════════════════════════════════════════════ */}
         <section
-          className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`absolute inset-0 transition-all duration-500 ease-out ${
             page === 3 ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"
           }`}
         >
           <div
             ref={docScrollRef}
             className="absolute inset-0 overflow-y-auto overscroll-contain pt-24 sm:pt-28 pb-16 px-4 sm:px-6 z-20 scroll-smooth"
-            style={{ WebkitOverflowScrolling: "touch" }}
+            style={{ WebkitOverflowScrolling: "touch", transform: "translateZ(0)" }}
           >
             <div className="max-w-[840px] mx-auto space-y-10">
               {/* Plotter Paper Blueprint Sheet */}
@@ -428,7 +431,7 @@ export default function GhostLandingPage() {
                         title: "AI Drafting Agent",
                         badge: "Gemini 2.5 Flash",
                         icon: Sparkles,
-                        desc: "Generates personalized, evidence-backed cover letters and cold outreach messages referencing verified GitProof metrics rather than generic template boilerplate.",
+                        desc: "Generates personalized, evidence-backed cover letters and cold outreach messages referencing verified GitProof data rather than generic template boilerplate.",
                         href: "/dashboard/tracker?tab=draft",
                       },
                       {
