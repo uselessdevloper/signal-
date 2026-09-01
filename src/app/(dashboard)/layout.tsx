@@ -6,9 +6,18 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex gap-3 h-screen w-full p-3 overflow-hidden bg-[oklch(0.965_0.008_264)]">
+    <div className="mesh-bg flex gap-3 h-screen w-full p-3 overflow-hidden">
+      {/* Animated floating colour orbs */}
+      <div className="mesh-orbs" aria-hidden>
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+
       <Sidebar />
-      <main className="flex-1 overflow-y-auto relative bg-white rounded-2xl border border-[oklch(0.88_0.01_264)] shadow-sm">
+
+      <main className="dashboard-surface flex-1 overflow-y-auto relative rounded-2xl z-10">
         {children}
       </main>
     </div>

@@ -102,45 +102,101 @@ import Marquee from "@/components/animata/container/marquee";
 
 function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Background Image */}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 bg-[oklch(0.975_0.008_264)]">
+
+      {/* Animated aurora orbs */}
+      <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden>
+        <div
+          className="absolute -top-40 -left-32 w-[700px] h-[700px] rounded-full opacity-[0.28]"
+          style={{
+            background: "radial-gradient(circle, oklch(0.60 0.24 276), transparent 70%)",
+            filter: "blur(90px)",
+            animation: "mesh-drift-1 16s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full opacity-[0.22]"
+          style={{
+            background: "radial-gradient(circle, oklch(0.62 0.22 295), transparent 70%)",
+            filter: "blur(100px)",
+            animation: "mesh-drift-2 20s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute top-1/3 left-1/2 w-[380px] h-[380px] rounded-full opacity-[0.15]"
+          style={{
+            background: "radial-gradient(circle, oklch(0.68 0.21 156), transparent 70%)",
+            filter: "blur(70px)",
+            animation: "mesh-drift-3 24s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] rounded-full opacity-[0.14]"
+          style={{
+            background: "radial-gradient(circle, oklch(0.78 0.19 60), transparent 70%)",
+            filter: "blur(60px)",
+            animation: "mesh-drift-2 28s ease-in-out infinite reverse",
+          }}
+        />
+      </div>
+
+      {/* Dot grid overlay */}
       <div
-        className="absolute inset-0 z-0 bg-[url('/bg-image.png')] bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 z-0"
+        aria-hidden
+        style={{
+          backgroundImage: "radial-gradient(circle, oklch(0.54 0.22 276 / 10%) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+          maskImage: "radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%)",
+        }}
       />
-      {/* Subtle overlay to ensure text readability */}
-      <div className="absolute inset-0 z-0 bg-black/10" />
+
+      {/* Vignette edges */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 110% 90% at 50% 50%, transparent 50%, oklch(0.975 0.008 264) 100%)",
+        }}
+      />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-        {/* Spacer to push content down and vertically center the text better */}
         <div className="h-[100px] sm:h-[140px]" />
 
         {/* Headline */}
         <h1 className="flex flex-col items-center justify-center font-bold tracking-tight leading-[1.1] animate-fade-in-up">
-          <span className="text-3xl sm:text-4xl md:text-5xl text-white mb-2 font-medium tracking-normal">
+          <span className="text-3xl sm:text-4xl md:text-5xl text-foreground/70 mb-2 font-medium tracking-normal">
             Autonomous Multi-Agent
           </span>
           <ShimmerText text="Career Intelligence." className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl pb-2" />
         </h1>
 
         {/* Subheadline */}
-        <p className="mt-6 text-lg sm:text-xl text-white max-w-3xl mx-auto leading-relaxed animate-fade-in-up [animation-delay:150ms]">
+        <p className="mt-6 text-lg sm:text-xl text-foreground/60 max-w-3xl mx-auto leading-relaxed animate-fade-in-up [animation-delay:150ms]">
           Suppose you are a student ready for your career, but lost in the noise unsure, overwhelmed by application tracking, and facing silent ATS resume rejections. Don&apos;t worry — Signal is here for you.
         </p>
 
         {/* CTAs */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up [animation-delay:300ms]">
-          <Link href="/dashboard/tracker" className="px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-lg">
-            <Zap className="w-4 h-4 text-black" />
+          <Link
+            href="/dashboard/tracker"
+            className="px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg text-white"
+            style={{ background: "linear-gradient(135deg, oklch(0.54 0.22 276), oklch(0.58 0.23 295))" }}
+          >
+            <Zap className="w-4 h-4" />
             Launch Multi-Agent Command Center
           </Link>
-          <Link href="/dashboard" className="px-6 py-3 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-semibold hover:bg-zinc-800 transition-all flex items-center gap-2">
+          <Link
+            href="/dashboard"
+            className="px-6 py-3 rounded-xl border border-border bg-white/80 backdrop-blur-sm text-foreground font-semibold hover:bg-white transition-all flex items-center gap-2 shadow-sm"
+          >
             View Skill Passport
+            <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
 
-        {/* Hero visual — floating passport preview */}
+        {/* Hero visual */}
         <div className="mt-20 animate-fade-in-up [animation-delay:600ms] relative max-w-4xl mx-auto">
-          {/* Applying a mask-image to create a soft fade on the edges so it blends into the background */}
           <div className="relative mx-auto max-w-4xl [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)]">
             <img src="/sample.png" alt="Signal Multi-Agent & Skill Passport Preview" className="w-full h-auto block opacity-90" />
           </div>
@@ -149,6 +205,7 @@ function HeroSection() {
     </section>
   );
 }
+
 
 function ProblemSection() {
   const heroCard = {
