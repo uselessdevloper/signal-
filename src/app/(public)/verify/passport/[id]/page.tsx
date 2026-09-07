@@ -31,15 +31,15 @@ export default async function VerifyPassportPage({ params }: Props) {
   const profile = matched?.profiles;
 
   const studentData = {
-    cardId: snap?.card_id || `CDY2025-${id.slice(-6)}`,
+    cardId: snap?.card_id || `CDY2026-${id.slice(-6)}`,
     studentId: snap?.student_id || id,
-    name: snap?.profile?.name || profile?.full_name || "Jane Doe",
-    gender: snap?.gender || profile?.gender || "Female",
+    name: snap?.profile?.name || profile?.full_name || "Utkarsh Sinha",
+    gender: snap?.gender || profile?.gender || "Male",
     degree: snap?.degree || profile?.degree || "B.Tech – Computer Science Engineering",
     college: snap?.profile?.college || profile?.college_name || "IIT Delhi",
-    avatarUrl: snap?.profile?.avatar_url || profile?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-    issueDate: snap?.issue_date || "18 MAY 2025",
-    expiryDate: snap?.expiry_date || "17 MAY 2027",
+    avatarUrl: snap?.profile?.avatar_url || profile?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80",
+    issueDate: snap?.issue_date || "03 SEP 2026",
+    expiryDate: snap?.expiry_date || "03 SEP 2028",
     coursesCompleted: snap?.courses_completed || 14,
     skillsVerified: snap?.skills_verified || 12,
     certificatesEarned: snap?.certificates_earned || 3,

@@ -64,20 +64,20 @@ export function OpportunityMatcher() {
   };
 
   return (
-    <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-6 shadow-sm">
+    <div className="bg-[#fbfcfd] border border-zinc-200/80 rounded-2xl p-6 shadow-2xs">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-          <Target className="w-5 h-5 text-white" />
+        <div className="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center shadow-2xs">
+          <Target className="w-4 h-4" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-zinc-100">Opportunity Matcher</h2>
-          <p className="text-sm text-zinc-400">Compare your AI Passport against a real job description.</p>
+          <h2 className="text-sm font-semibold text-zinc-900">Opportunity Matcher</h2>
+          <p className="text-xs text-zinc-500">Compare your AI Passport against any real job description in real-time.</p>
         </div>
       </div>
 
       <Textarea 
         placeholder="Paste an internship or job description here..."
-        className="min-h-[120px] mb-4 bg-white/[0.02] border-white/10 text-white focus-visible:ring-white/20 placeholder:text-zinc-600"
+        className="min-h-[100px] mb-3 bg-white border-zinc-200 text-zinc-900 focus-visible:ring-zinc-400 placeholder:text-zinc-400 text-xs resize-none"
         value={jobDescription}
         onChange={(e) => setJobDescription(e.target.value)}
         disabled={status === "pending" || status === "processing"}
@@ -86,50 +86,50 @@ export function OpportunityMatcher() {
       <Button 
         onClick={handleMatch}
         disabled={!jobDescription.trim() || status === "pending" || status === "processing"}
-        className="w-full bg-white text-black hover:bg-zinc-200 h-11 font-medium"
+        className="w-full bg-zinc-900 text-white hover:bg-zinc-800 h-9 font-medium text-xs shadow-2xs cursor-pointer"
       >
         {(status === "pending" || status === "processing") ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Analyzing Profile...
+            <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+            Analyzing Match Score...
           </>
-        ) : "Evaluate Match"}
+        ) : "Evaluate Match with Passport"}
       </Button>
 
       {error && (
-        <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-100 flex gap-3 text-red-900 text-sm">
-          <XCircle className="w-5 h-5 text-red-500 shrink-0" />
+        <div className="mt-3 p-3 rounded-xl bg-red-50 border border-red-200 flex gap-2 text-red-700 text-xs">
+          <XCircle className="w-4 h-4 text-red-500 shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
       {result && status === "completed" && (
-        <div className="mt-6 space-y-4 animate-fade-in-up">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
-            <span className="font-medium text-zinc-300">Match Score</span>
-            <div className="flex items-center gap-2">
-              <span className={`text-2xl font-bold ${result.match_score > 70 ? 'text-green-400' : 'text-amber-400'}`}>
+        <div className="mt-5 space-y-3 animate-fade-in">
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-zinc-200 shadow-2xs">
+            <span className="text-xs font-semibold text-zinc-700">Semantic Match Score</span>
+            <div className="flex items-center gap-1.5">
+              <span className={`text-xl font-bold font-mono ${result.match_score > 70 ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {result.match_score}%
               </span>
             </div>
           </div>
           
-          <div>
-            <h4 className="font-medium text-zinc-200 mb-2 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-zinc-400" />
+          <div className="p-3.5 rounded-xl bg-white border border-zinc-200 shadow-2xs space-y-1">
+            <h4 className="text-xs font-semibold text-zinc-900 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
               Verdict
             </h4>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-xs text-zinc-600 leading-relaxed">
               {result.explainable_text}
             </p>
           </div>
           
-          <div>
-            <h4 className="font-medium text-zinc-200 mb-2 flex items-center gap-2">
-              <Target className="w-4 h-4 text-zinc-400" />
+          <div className="p-3.5 rounded-xl bg-white border border-zinc-200 shadow-2xs space-y-1">
+            <h4 className="text-xs font-semibold text-zinc-900 flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-blue-600" />
               Gap Analysis
             </h4>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-xs text-zinc-600 leading-relaxed">
               {result.gap_analysis}
             </p>
           </div>
@@ -138,3 +138,4 @@ export function OpportunityMatcher() {
     </div>
   );
 }
+

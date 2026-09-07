@@ -122,13 +122,14 @@ export interface StudentPassportProps {
 }
 
 export function StudentPassportIdCard({ studentData, className }: StudentPassportProps) {
+  const [imgError, setImgError] = React.useState(false);
   const cardId = studentData?.cardId || "SIG2026-000742";
   const studentId = studentData?.studentId || "SIG26S7421";
-  const name = studentData?.name || "Jane Doe";
-  const gender = studentData?.gender || "Female";
+  const name = studentData?.name || "Utkarsh Sinha";
+  const gender = studentData?.gender || "Male";
   const degree = studentData?.degree || "B.Tech – Computer Science Engineering";
-  const issueDate = studentData?.issueDate || "18 MAY 2026";
-  const expiryDate = studentData?.expiryDate || "17 MAY 2028";
+  const issueDate = studentData?.issueDate || "03 SEP 2026";
+  const expiryDate = studentData?.expiryDate || "03 SEP 2028";
   const coursesCompleted = studentData?.coursesCompleted ?? 14;
   const skillsVerified = studentData?.skillsVerified ?? 12;
   const certificatesEarned = studentData?.certificatesEarned ?? 3;
@@ -139,10 +140,18 @@ export function StudentPassportIdCard({ studentData, className }: StudentPasspor
       ? `${window.location.origin}/verify/passport/${studentId}`
       : `https://signal.dev/verify/passport/${studentId}`);
 
-  // Default Illustrated Female Avatar if none provided
+  // Default Avatar
   const avatarUrl =
     studentData?.avatarUrl ||
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
+    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80";
+
+  const userInitials = name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div
@@ -196,11 +205,22 @@ export function StudentPassportIdCard({ studentData, className }: StudentPasspor
       <div className="grid grid-cols-2 gap-4 items-center my-3 relative z-10">
         {/* Student Portrait */}
         <div className="w-36 h-40 rounded-2xl border-2 border-[#b8d6fc] bg-[#eaf3fe] overflow-hidden shadow-inner flex items-center justify-center p-1">
-          <img
-            src={avatarUrl}
-            alt={name}
-            className="w-full h-full object-cover object-top rounded-xl"
-          />
+          {imgError || !avatarUrl ? (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#006ddf] to-[#0a235c] text-white rounded-xl shadow-inner select-none p-2">
+              <div className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center mb-1 shadow-sm">
+                <User className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-sm font-bold font-mono tracking-widest">{userInitials}</span>
+              <span className="text-[9px] text-blue-200 font-mono tracking-wider mt-0.5">VERIFIED</span>
+            </div>
+          ) : (
+            <img
+              src={avatarUrl}
+              alt={name}
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover object-top rounded-xl"
+            />
+          )}
         </div>
 
         {/* Verification Seal */}

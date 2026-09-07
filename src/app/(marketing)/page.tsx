@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import {
   Zap,
   Kanban,
@@ -40,39 +42,86 @@ const TaglineRotator = memo(function TaglineRotator() {
   return <p className="ghost-typing tracking-widest">{TAGLINES[index]}</p>;
 });
 
-// Isolated Headline Rotator (zero re-render of parent stage)
+// Isolated Headline Rotator (Single-node smooth flash shuffle -> zero ghosting)
 const HeadlineRotator = memo(function HeadlineRotator({ isActive }: { isActive: boolean }) {
   const HEADLINES = [
     { line1: "tracks every", line2: "job application." },
     { line1: "parses recruiter", line2: "emails autonomously." },
     { line1: "verifies github", line2: "proof of skill." },
     { line1: "defeats silent", line2: "ats resume filters." },
+    { line1: "orchestrates 6", line2: "ai career agents." },
+    { line1: "proves engineering", line2: "rigor & authenticity." },
   ];
+
   const [index, setIndex] = useState(0);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const targetIndexRef = useRef(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!isActive) return;
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % HEADLINES.length);
-    }, 2800);
-    return () => clearInterval(interval);
+
+    let isMounted = true;
+    const DELAYS = [65, 70, 80, 100, 135, 180, 240];
+
+    const runFlashSequence = () => {
+      let step = 0;
+      const nextTarget = (targetIndexRef.current + 1) % HEADLINES.length;
+      setIsFlashing(true);
+
+      const nextTick = () => {
+        if (!isMounted) return;
+        if (step < DELAYS.length - 1) {
+          setIndex((prev) => (prev + 1) % HEADLINES.length);
+          const delay = DELAYS[step];
+          step++;
+          timeoutRef.current = setTimeout(nextTick, delay);
+        } else {
+          // Smoothly lock onto target phrase
+          targetIndexRef.current = nextTarget;
+          setIndex(nextTarget);
+          setIsFlashing(false);
+          // Hold and pause for 2.8s
+          timeoutRef.current = setTimeout(runFlashSequence, 2800);
+        }
+      };
+
+      nextTick();
+    };
+
+    // Initial pause before first transition
+    timeoutRef.current = setTimeout(runFlashSequence, 2800);
+
+    return () => {
+      isMounted = false;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [isActive, HEADLINES.length]);
 
   return (
-    <>
-      <p
-        className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight leading-tight text-white/80 transition-opacity duration-300"
-        style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+    <div className="relative select-none min-h-[140px] sm:min-h-[180px] md:min-h-[200px] flex flex-col justify-start">
+      <div
+        className={cn(
+          "transition-all",
+          isFlashing
+            ? "opacity-85 translate-y-[-2px] duration-75 ease-linear"
+            : "opacity-100 translate-y-0 duration-300 ease-out"
+        )}
       >
-        {HEADLINES[index].line1}
-      </p>
-      <p
-        className="text-4xl sm:text-6xl md:text-7xl font-medium tracking-tight leading-tight text-white mt-1 transition-opacity duration-300"
-        style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
-      >
-        {HEADLINES[index].line2}
-      </p>
-    </>
+        <p
+          className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight leading-tight text-white/80"
+          style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+        >
+          {HEADLINES[index].line1}
+        </p>
+        <p
+          className="text-4xl sm:text-6xl md:text-7xl font-medium tracking-tight leading-tight text-white mt-1"
+          style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+        >
+          {HEADLINES[index].line2}
+        </p>
+      </div>
+    </div>
   );
 });
 
@@ -479,17 +528,10 @@ export default function GhostLandingPage() {
                 <div className="mt-8 pt-6 border-t border-[#006ddf]/20 pl-3 pr-3 flex flex-col sm:flex-row items-center gap-3">
                   <Link
                     href="/dashboard/tracker"
-                    className="w-full sm:w-auto flex-1 py-3.5 px-6 rounded-lg bg-[#006ddf] text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#005bb8] transition-colors shadow-md"
+                    className="w-full py-3.5 px-6 rounded-lg bg-[#006ddf] text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#005bb8] transition-colors shadow-md"
                   >
                     <Zap className="w-4 h-4" />
                     Open Live Application Tracker
-                  </Link>
-                  <Link
-                    href="/dashboard"
-                    className="w-full sm:w-auto py-3.5 px-6 rounded-lg border border-[#006ddf]/30 bg-white/75 text-[#006ddf] text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-white transition-colors"
-                  >
-                    <FileCheck2 className="w-4 h-4" />
-                    View Verified Skill Passport
                   </Link>
                 </div>
               </article>

@@ -124,11 +124,16 @@ export default async function DashboardPage() {
         heatmap = Array(7).fill(0).map((_, r) => Array(52).fill(0).map((_, c) => (r * 7 + c * 13) % Math.min(5, totalRepos + 1)));
       }
 
+      const candidateName = profile?.full_name || "Utkarsh Sinha";
+      const candidateGender = profile?.gender || "Male";
+      const candidateDegree = profile?.degree || "B.Tech – Computer Science Engineering";
+      const candidateCollege = profile?.college_name || "IIT Delhi";
+
       mappedData = {
-        name: snap.profile?.name || profile?.full_name || "Jane Doe",
-        gender: snap.gender || profile?.gender || "Female",
-        careerGoal: snap.profile?.headline || profile?.headline || "Software Engineer",
-        profileImage: snap.profile?.avatar_url || profile?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+        name: candidateName,
+        gender: candidateGender,
+        careerGoal: profile?.headline || snap.profile?.headline || "Full-Stack & AI Systems Engineer",
+        profileImage: profile?.avatar_url || snap.profile?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80",
         verifiedSkills: (snap.skills || []).map((s: any) => ({
           name: s.name,
           confidence: s.confidence,
@@ -182,13 +187,13 @@ export default async function DashboardPage() {
       studentPassportData = {
         cardId,
         studentId,
-        name: mappedData.name,
-        gender: mappedData.gender,
-        degree: snap.degree || profile?.degree || "B.Tech – Computer Science Engineering",
-        college: snap.profile?.college || profile?.college_name || "IIT Delhi",
+        name: candidateName,
+        gender: candidateGender,
+        degree: candidateDegree,
+        college: candidateCollege,
         avatarUrl: mappedData.profileImage,
-        issueDate: snap.issue_date || "18 MAY 2025",
-        expiryDate: snap.expiry_date || "17 MAY 2027",
+        issueDate: snap.issue_date || "03 SEP 2026",
+        expiryDate: snap.expiry_date || "03 SEP 2028",
         coursesCompleted: snap.courses_completed || totalRepos || 14,
         skillsVerified: snap.skills_verified || (snap.skills || []).length || 12,
         certificatesEarned: snap.certificates_earned || (certs || []).length || 3,
@@ -218,7 +223,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="w-full min-h-full flex flex-col gap-10 px-4 sm:px-8 py-10 max-w-[1400px] mx-auto">
+    <div className="w-full min-h-full flex flex-col gap-10 px-4 sm:px-8 py-8 max-w-[1400px] mx-auto text-zinc-900 font-sans">
       {/* TOP ROW: Passport Card Switcher + Skill Gap Analysis */}
       <div className="w-full flex flex-col lg:flex-row items-start justify-start gap-8 lg:gap-12">
         {/* LEFT: Passport Card Switcher */}
@@ -227,33 +232,33 @@ export default async function DashboardPage() {
         </div>
 
         {/* RIGHT: Skill Gap Analysis & Career Recommendations */}
-        <div className="flex-1 w-full flex flex-col justify-start gap-8 pr-2 pb-6">
+        <div className="flex-1 w-full flex flex-col justify-start gap-6 pr-2 pb-6">
           {/* Section 1: Gap Analysis */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <Brain className="w-4 h-4 text-blue-400" />
-              <h3 className="text-[12px] font-bold tracking-widest text-blue-400 uppercase">
+          <div className="flex flex-col gap-2 p-5 rounded-2xl bg-[#fbfcfd] border border-zinc-200/80 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Brain className="w-4 h-4 text-blue-600" />
+              <h3 className="text-xs font-bold tracking-wider text-blue-700 font-mono uppercase">
                 AI Skill Gap Analysis
               </h3>
             </div>
             <div>
-              <p className="text-[15px] text-white/80 leading-relaxed font-medium">
+              <p className="text-sm text-zinc-700 leading-relaxed font-normal">
                 {mappedData?.missingSkillsAnalysis?.description || "Keep building to unlock gap analysis."}
               </p>
             </div>
           </div>
           
           {/* Section 2: Recommended Tech Stack */}
-          <div className="flex flex-col gap-4 pt-6 border-t border-white/[0.08]">
-            <div className="flex items-center gap-3">
-              <Target className="w-4 h-4 text-emerald-400" />
-              <h3 className="text-[12px] font-bold tracking-widest text-emerald-400 uppercase">
+          <div className="flex flex-col gap-3 p-5 rounded-2xl bg-[#fbfcfd] border border-zinc-200/80 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-emerald-600" />
+              <h3 className="text-xs font-bold tracking-wider text-emerald-700 font-mono uppercase">
                 Recommended Tech Stack
               </h3>
             </div>
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2">
               {(mappedData?.missingSkillsAnalysis?.recommendedTechStack || []).map((tech: string) => (
-                <span key={tech} className="px-4 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.04] shadow-sm text-[13px] text-white/95 font-medium tracking-wide">
+                <span key={tech} className="px-3 py-1 rounded-lg border border-zinc-200 bg-white shadow-2xs text-xs text-zinc-800 font-medium tracking-tight">
                   {tech}
                 </span>
               ))}
@@ -261,26 +266,25 @@ export default async function DashboardPage() {
           </div>
 
           {/* Section 3: Suggested Projects */}
-          <div className="flex flex-col gap-4 pt-6 border-t border-white/[0.08]">
-            <div className="flex items-center gap-3">
-              <Briefcase className="w-4 h-4 text-purple-400" />
-              <h3 className="text-[12px] font-bold tracking-widest text-purple-400 uppercase">
+          <div className="flex flex-col gap-3 p-5 rounded-2xl bg-[#fbfcfd] border border-zinc-200/80 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-purple-600" />
+              <h3 className="text-xs font-bold tracking-wider text-purple-700 font-mono uppercase">
                 Suggested Projects
               </h3>
             </div>
-            <div className="flex flex-col gap-3.5 mt-1">
+            <div className="flex flex-col gap-2.5 mt-1">
               {(mappedData?.missingSkillsAnalysis as any)?.suggestedProjects?.map((proj: any, idx: number) => (
-                <div key={idx} className="flex flex-col gap-1.5 p-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] transition-colors relative overflow-hidden group">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500/40 group-hover:bg-purple-400 transition-colors" />
-                  <span className="text-[14px] text-white font-bold tracking-tight">{proj.name}</span>
-                  <span className="text-[13px] text-white/60 leading-relaxed">{proj.description}</span>
+                <div key={idx} className="flex flex-col gap-1 p-3.5 rounded-xl border border-zinc-200/70 bg-white hover:border-zinc-300 transition-colors shadow-2xs group">
+                  <span className="text-sm text-zinc-900 font-semibold tracking-tight">{proj.name}</span>
+                  <span className="text-xs text-zinc-500 leading-relaxed">{proj.description}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Section 4: Opportunity Matcher */}
-          <div className="pt-6 border-t border-white/[0.08]">
+          <div className="pt-2">
             <OpportunityMatcher />
           </div>
         </div>

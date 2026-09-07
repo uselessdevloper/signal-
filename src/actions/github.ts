@@ -18,6 +18,13 @@ export async function syncGitHub(username: string, token: string) {
   try {
     const { data: ghUser } = await octokit.rest.users.getByUsername({ username });
 
+    // Remove any stale connection for this GitHub username under another profile to prevent unique constraint conflict
+    await supabase
+      .from("github_connections")
+      .delete()
+      .eq("github_username", ghUser.login)
+      .neq("profile_id", user.id);
+
     const { data: connection, error: connectionError } = await supabase
       .from("github_connections")
       .upsert(

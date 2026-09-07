@@ -125,11 +125,20 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 
 export function SkillPassportCard({ data = DUMMY_DATA }: { data?: SkillPassportData }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   // Calculate confidence counts
   const highCount = data.verifiedSkills.filter(s => s.confidence === "High").length;
   const mediumCount = data.verifiedSkills.filter(s => s.confidence === "Medium").length;
   const lowCount = data.verifiedSkills.filter(s => s.confidence === "Low").length;
+
+  const initials = data.name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <motion.div 
@@ -155,7 +164,18 @@ export function SkillPassportCard({ data = DUMMY_DATA }: { data?: SkillPassportD
             <div className="absolute inset-2 border border-white/[0.06] rounded-full" />
             <div className="absolute inset-4 border border-white/[0.08] rounded-full" />
             <div className="w-[72px] h-[72px] rounded-full bg-[#111] border border-white/[0.15] overflow-hidden relative z-10 flex items-center justify-center">
-              <img src={data.profileImage} alt={data.name} className="w-full h-full object-cover" />
+              {imgError || !data.profileImage ? (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-900 text-white font-mono font-bold text-lg">
+                  {initials}
+                </div>
+              ) : (
+                <img
+                  src={data.profileImage}
+                  alt={data.name}
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
           </div>
 

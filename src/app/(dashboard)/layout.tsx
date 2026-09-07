@@ -6,24 +6,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex gap-3 h-screen w-full p-3 overflow-hidden bg-[#0d0f14] text-foreground font-sans">
-      {/* Ghost Background Gradient Wash */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-20"
-        style={{
-          background: "linear-gradient(135deg, #008dee 0%, #0179e9 40%, #fa4700 80%, #111215 100%)",
-        }}
-        aria-hidden="true"
-      />
-
-      {/* CRT Scanline Shader */}
-      <div className="ghost-tv-lines opacity-60" aria-hidden="true" />
-
-      {/* Sidebar */}
+    <div className="relative flex h-screen w-full overflow-hidden bg-[#f4f5f7] text-zinc-900 font-sans antialiased">
+      {/* Multica Style Sidebar */}
       <Sidebar />
 
-      {/* Main Content Area in Blueprint Panel styling */}
-      <main className="flex-1 overflow-y-auto relative rounded-2xl bg-[#f8fbfe] border border-[#006ddf]/20 shadow-2xl z-10 scroll-smooth">
+      {/* Main Workspace Viewport */}
+      <main className="flex-1 overflow-y-auto relative bg-[#ffffff] m-2 ml-0 rounded-2xl border border-zinc-200/80 shadow-sm z-10 scroll-smooth">
         {children}
       </main>
     </div>

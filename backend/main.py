@@ -14,11 +14,13 @@ for p in [gitproof_dir, verifier_dir]:
         sys.path.insert(0, p)
 
 from fastapi import FastAPI, HTTPException, Request, Body
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel, Field
 from graph import signal_graph
 from gitproof.app import app as gitproof_app
+import auth
 import json
 
 try:
@@ -87,6 +89,52 @@ def health():
         "pipeline": "LangGraph 6-Agent StateMachine",
         "gemini_model": "gemini-2.5-flash",
     }
+
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+
+@app.get("/auth/login")
+def auth_login(request: Request):
+    state = auth.generate_state()
+    request.session["oauth_state"] = state
+    return RedirectResponse(auth.get_authorize_url(state))
+
+
+@app.get("/auth/callback")
+def auth_callback(
+    request: Request,
+    code: str = None,
+    state: str = None,
+    error: str = None,
+):
+    if error:
+        return RedirectResponse(f"{FRONTEND_URL}/dashboard/settings?auth_error={error}")
+
+    expected = request.session.pop("oauth_state", None)
+    if not state or state != expected:
+        return RedirectResponse(f"{FRONTEND_URL}/dashboard/settings?auth_error=invalid_state")
+
+    if not code:
+        return RedirectResponse(f"{FRONTEND_URL}/dashboard/settings?auth_error=missing_code")
+
+    try:
+        token = auth.exchange_code_for_token(code)
+        github_user = auth.get_authenticated_user(token)
+    except Exception as exc:
+        return RedirectResponse(f"{FRONTEND_URL}/dashboard/settings?auth_error={str(exc)}")
+
+    request.session["github_token"] = token
+    request.session["github_user"] = github_user
+    username = github_user.get("login", "")
+    return RedirectResponse(f"{FRONTEND_URL}/dashboard/settings?connected=true&github_username={username}")
+
+
+@app.post("/auth/logout")
+def auth_logout(request: Request):
+    request.session.clear()
+    return {"status": "logged_out"}
+
 
 
 class PipelineRunRequest(BaseModel):
