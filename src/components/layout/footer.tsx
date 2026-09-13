@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Shield, GitBranch } from "lucide-react";
+import { GitBranch } from "lucide-react";
+import { SignalLogo } from "@/components/ui/signal-logo";
 
 export function Footer() {
   return (
@@ -9,10 +10,14 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-lg font-semibold">Signal</span>
+              <SignalLogo size={22} rounded="rounded-md" />
+              <span className="text-lg font-bold tracking-tight">SIGNAL</span>
             </Link>
-            <p className="mt-3 text-sm text-muted-foreground max-w-[240px]">
-              Autonomous multi-agent career pipeline and deterministic proof-of-skill forensics for students and engineers.
+            <p className="mt-1 text-xs font-medium text-zinc-700">
+              Simplified Information for Guiding Networked Applications & Leads
+            </p>
+            <p className="mt-2.5 text-xs text-muted-foreground max-w-[240px]">
+              Autonomous multi-agent career pipeline and deterministic proof-of-skill forensics for engineers.
             </p>
           </div>
 

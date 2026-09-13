@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { User, GraduationCap, BookOpen, Award, FileBadge } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SignalLogo } from "@/components/ui/signal-logo";
 
 // --- Deterministic Barcode SVG Generator ---
 function BarcodeSVG({ value, height = 40, className }: { value: string; height?: number; className?: string }) {
@@ -172,12 +173,15 @@ export function StudentPassportIdCard({ studentData, className }: StudentPasspor
         }}
       />
 
-      {/* Top Header: ID & Circuit Icon */}
+      {/* Top Header: Brand Logo & ID */}
       <div className="flex items-center justify-between pb-4 border-b border-[#e1ecfb] relative z-10">
+        <div className="flex items-center gap-2">
+          <SignalLogo size={22} rounded="rounded-md" />
+          <span className="text-xs font-black tracking-widest text-[#0b2559]">SIGNAL</span>
+        </div>
         <span className="text-xs font-extrabold tracking-wider text-[#0b2559] uppercase">
           ID: {cardId}
         </span>
-        <CircuitBadgeIcon />
       </div>
 
       {/* Holder Info */}

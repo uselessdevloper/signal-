@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { CertificateUploader } from "@/components/certificates/certificate-uploader";
 import { FileBadge, ShieldCheck, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,16 +9,47 @@ export default async function CertificatesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
+  const cookieStore = await cookies();
+  const isDemo = cookieStore.get("demo-session")?.value === "true";
+
+  if (!user && !isDemo) {
     redirect("/login");
   }
 
   // Fetch certificates
-  const { data: certificates } = await supabase
-    .from("certificates")
-    .select("*")
-    .eq("profile_id", user.id)
-    .order("created_at", { ascending: false });
+  let certificates: any[] = [];
+  if (user) {
+    const { data } = await supabase
+      .from("certificates")
+      .select("*")
+      .eq("profile_id", user.id)
+      .order("created_at", { ascending: false });
+    certificates = data || [];
+  } else if (isDemo) {
+    certificates = [
+      {
+        id: "demo_cert_1",
+        title: "AWS Certified Developer – Associate",
+        issuer: "Amazon Web Services",
+        status: "verified",
+        file_url: "#",
+      },
+      {
+        id: "demo_cert_2",
+        title: "Deep Learning Specialization",
+        issuer: "DeepLearning.AI",
+        status: "verified",
+        file_url: "#",
+      },
+      {
+        id: "demo_cert_3",
+        title: "Meta Certified Front-End Developer",
+        issuer: "Meta",
+        status: "verified",
+        file_url: "#",
+      },
+    ];
+  }
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-start p-6 sm:p-10 relative overflow-y-auto font-sans text-zinc-900 bg-white">

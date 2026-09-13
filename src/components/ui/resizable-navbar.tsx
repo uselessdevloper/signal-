@@ -9,6 +9,7 @@ import {
 } from "motion/react";
 
 import React, { useRef, useState } from "react";
+import { SignalLogo } from "@/components/ui/signal-logo";
 
 
 interface NavbarProps {
@@ -233,17 +234,11 @@ export const MobileNavToggle = ({
 export const NavbarLogo = () => {
   return (
     <a
-      href="#"
-      className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-inherit"
+      href="/"
+      className="relative z-20 mr-4 flex items-center space-x-2.5 px-2 py-1 text-sm font-bold tracking-tight text-inherit"
     >
-      <img
-        src="https://assets.aceternity.com/logo-dark.png"
-        alt="logo"
-        width={30}
-        height={30}
-        className="dark:invert"
-      />
-      <span className="font-medium text-inherit">Signal</span>
+      <SignalLogo size={28} rounded="rounded-lg" />
+      <span className="font-bold text-inherit tracking-tight">SIGNAL</span>
     </a>
   );
 };

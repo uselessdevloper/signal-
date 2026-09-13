@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
+import { SignalLogo } from "@/components/ui/signal-logo"
 
 export function LoginModal({ children }: { children: React.ReactNode }) {
   const [email, setEmail] = useState("")
@@ -104,6 +105,10 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
 
       <DialogContent className="sm:max-w-md bg-[#18181b] border-zinc-700 rounded-3xl p-8 shadow-2xl data-open:zoom-in-100 data-closed:zoom-out-100 data-open:slide-in-from-bottom-[100vh] data-closed:slide-out-to-bottom-[100vh] duration-500 ease-in-out">
         <DialogHeader className="flex flex-col items-start sm:text-left mt-0">
+          <div className="flex items-center gap-2.5 mb-3">
+            <SignalLogo size={28} rounded="rounded-lg" />
+            <span className="text-base font-bold tracking-tight text-white">SIGNAL</span>
+          </div>
           <DialogTitle className="text-3xl font-medium tracking-tight text-white mb-2">Welcome back!</DialogTitle>
           <DialogDescription className="text-zinc-400 text-sm leading-relaxed max-w-sm">
             Turn GitHub activity, certifications, and achievements into an evidence-backed skill passport and find the right teammates.

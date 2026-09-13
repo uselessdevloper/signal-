@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { OpportunityMatcher } from "@/components/dashboard/opportunity-matcher";
 import { generatePassport } from "@/actions/passport";
+import { SignalLogo } from "@/components/ui/signal-logo";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -34,12 +35,12 @@ export default async function DashboardPage() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single(),
+        .maybeSingle(),
       supabase
         .from("github_connections")
         .select("id, github_username")
         .eq("profile_id", user.id)
-        .single()
+        .maybeSingle()
     ]);
 
     // If no passport exists yet, automatically generate it on the fly!
@@ -207,10 +208,12 @@ export default async function DashboardPage() {
     return (
       <div className="w-full h-full flex items-center justify-center p-8 relative overflow-hidden">
         <div className="glass overflow-hidden rounded-[24px] border border-white/[0.05] relative shadow-2xl w-full max-w-2xl mx-auto p-12 text-center z-10 animate-fade-in-up">
-          <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-            <UserCircle className="w-10 h-10 text-white/60" />
+          <div className="flex justify-center mb-6">
+            <SignalLogo size={64} rounded="rounded-2xl" className="shadow-xl" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-white mb-3">Welcome to Signal</h2>
+          <div className="flex items-center justify-center gap-2.5 mb-3">
+            <span className="text-3xl font-extrabold tracking-tight text-white">SIGNAL</span>
+          </div>
           <p className="text-white/60 max-w-md mx-auto text-lg leading-relaxed mb-8">
             Click below to generate your official Student ID Passport & GitProof audit.
           </p>

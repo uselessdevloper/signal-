@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional, List, Dict, Any
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,8 +35,9 @@ except ImportError:
     REGISTRY_PATH = verifier_mod.REGISTRY_PATH
 
 app = FastAPI(
-    title="Signal — AI Job Application Tracker API",
+    title="SIGNAL: Simplified Information for Guiding Networked Applications & Leads API",
     description=(
+        "SIGNAL (Simplified Information for Guiding Networked Applications & Leads) - "
         "6-agent LangGraph pipeline for autonomous job application tracking. "
         "Agents: Email Ingestion (Cloud Pub/Sub), MINSKY Code Forensics, "
         "Career Optimization, Live Kanban (Cloud Firestore), AI Drafting (Gemini 2.5 Flash), "
@@ -61,7 +63,8 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {
-        "service": "Signal — AI Job Application Tracker",
+        "service": "SIGNAL (Simplified Information for Guiding Networked Applications & Leads)",
+        "acronym": "Simplified Information for Guiding Networked Applications & Leads",
         "version": "3.0.0",
         "gcp_stack": {
             "llm": "Gemini 2.5 Flash (Vertex AI)",
@@ -177,42 +180,42 @@ class NudgeScheduleRequest(BaseModel):
     interview_date: Optional[str] = None
 
 
+from adk.orchestrator import global_orchestrator
+from adk.memory import global_memory_manager
+from adk.scorecard import global_scorecard_engine
+
+class FeedbackSubmitRequest(BaseModel):
+    agent_name: str
+    user_correction: str
+    feedback_type: Optional[str] = "USER_CORRECTION"
+    application_id: Optional[str] = None
+    desired_behavior: Optional[str] = None
+    original_output: Optional[str] = None
+
+class ScorecardGenerateRequest(BaseModel):
+    job_description: Optional[str] = None
+    company: Optional[str] = "TechCorp"
+    job_title: Optional[str] = "Full Stack Engineer"
+    candidate_profile: Optional[Dict[str, Any]] = None
+    stage: Optional[str] = "Technical Screen"
+
 @app.post("/api/pipeline/run")
 def run_full_pipeline(req: PipelineRunRequest):
-    """Run all 6 agents in sequence via the LangGraph state machine."""
+    """Run all 7 ADK agents in sequence with episodic memory and Greenhouse scorecard."""
     try:
-        initial_state = {
-            "inbound_email": req.inbound_email,
+        context_dict = {
             "application_id": f"app_{int(os.times().system * 1000)}",
-            "company": req.company,
-            "job_title": req.job_title,
-            "job_description": req.job_description,
-            "candidate_profile": req.candidate_profile or {"skills": ["TypeScript", "React", "Python", "FastAPI", "Docker"]},
+            "company": req.company or "TechCorp",
+            "job_title": req.job_title or "Full Stack Engineer",
+            "job_description": req.job_description or "Full stack development with TypeScript, React, Python, and scalable distributed systems.",
+            "candidate_profile": req.candidate_profile or {"skills": ["TypeScript", "React", "Python", "FastAPI", "Docker", "GCP"]},
+            "inbound_email": req.inbound_email,
             "github_token": req.github_token,
             "github_username": req.github_username,
-            "ingestion_result": None,
-            "minsky_forensics": None,
-            "career_optimization": None,
-            "kanban_state": None,
-            "drafted_outreach": None,
-            "scheduled_nudges": None,
-            "errors": [],
         }
 
-        final_state = signal_graph.invoke(initial_state)
-
-        return {
-            "success": True,
-            "pipeline": "Signal 6-Agent Career Workflow",
-            "results": {
-                "ingestion": final_state.get("ingestion_result"),
-                "minsky_forensics": final_state.get("minsky_forensics"),
-                "career_optimization": final_state.get("career_optimization"),
-                "kanban_state": final_state.get("kanban_state"),
-                "drafted_outreach": final_state.get("drafted_outreach"),
-                "scheduled_nudges": final_state.get("scheduled_nudges"),
-            }
-        }
+        result = global_orchestrator.run_pipeline(context_dict)
+        return result
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -288,6 +291,94 @@ def generate_drafted_outreach(req: DraftingRequest):
     return {"success": True, "data": result.get("drafted_outreach")}
 
 
+class ImageGenerateRequest(BaseModel):
+    prompt: str
+    skill: Optional[str] = None
+    category: Optional[str] = "badge"
+
+
+@app.get("/api/gcp/status")
+def get_gcp_service_status():
+    """Check live status of Google Cloud services (Pub/Sub, Firestore, Storage, Gemini Text/Image)."""
+    import gcp_service
+    return gcp_service.get_gcp_status()
+
+
+@app.post("/api/image/generate")
+def generate_image_api(req: ImageGenerateRequest):
+    """Real-time credential badge & passport avatar image generation powered by Google Gemini Image Model."""
+    import gcp_service
+    try:
+        result = gcp_service.generate_credential_image(
+            prompt=req.prompt,
+            skill=req.skill,
+            category=req.category or "badge",
+            upload_to_gcs=True,
+        )
+        return {"success": True, "data": result}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "IMAGE_GENERATION_FAILED", "message": str(e)}
+        )
+
+
+@app.post("/api/pubsub/publish")
+def publish_email_to_pubsub(req: EmailIngestRequest):
+    """Publish an incoming recruiter email to Google Cloud Pub/Sub topic in real time."""
+    import gcp_service
+    try:
+        result = gcp_service.publish_recruiter_email(
+            sender=req.sender,
+            subject=req.subject,
+            body=req.body,
+        )
+        return {"success": True, "data": result}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "PUBSUB_PUBLISH_FAILED", "message": str(e)}
+        )
+
+
+@app.post("/api/pubsub/pull")
+def pull_and_process_pubsub_emails(max_messages: int = 5):
+    """Pull real-time messages from Cloud Pub/Sub and ingest them into Firestore via Agent 1."""
+    import gcp_service
+    from graph import email_ingestion_agent
+
+    try:
+        messages = gcp_service.pull_recruiter_emails(max_messages=max_messages, auto_ack=True)
+        processed = []
+        for msg in messages:
+            data = msg.get("data", {})
+            state = {
+                "inbound_email": {
+                    "sender": data.get("sender", "recruiter@unknown.com"),
+                    "subject": data.get("subject", "Job Update"),
+                    "body": data.get("body", ""),
+                },
+                "company": None,
+                "job_title": None,
+            }
+            res = email_ingestion_agent(state)
+            processed.append({
+                "message_id": msg.get("message_id"),
+                "ingestion": res,
+            })
+
+        return {
+            "success": True,
+            "pulled_count": len(messages),
+            "processed": processed,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "PUBSUB_PULL_FAILED", "message": str(e)}
+        )
+
+
 @app.post("/api/nudge/schedule")
 def schedule_nudges(req: NudgeScheduleRequest):
     """Agent 6: Schedule interview prep alerts and recruiter follow-ups via Google Cloud Tasks."""
@@ -299,6 +390,229 @@ def schedule_nudges(req: NudgeScheduleRequest):
     }
     result = scheduled_nudge_agent(state)
     return {"success": True, "data": result.get("scheduled_nudges")}
+
+
+@app.get("/api/adk/agents")
+def list_adk_agents():
+    """List all 7 registered Google ADK enterprise agents with memory stats."""
+    return {
+        "success": True,
+        "framework": "Google ADK (Agent Development Kit) v3.0",
+        "memory_backend": "Dual-Layer (SQLite + Cloud Firestore)",
+        "reflection_loop": "Continuous Self-Correction via GitProof Distillation",
+        "agents": [
+            {
+                "id": "1",
+                "name": "ATSNormalizerAgent",
+                "role": "Recruiter Ingestion & Entity Extraction",
+                "cloud_service": "Cloud Pub/Sub + Gemini Flash",
+                "memory_enabled": True,
+            },
+            {
+                "id": "2",
+                "name": "MinskyForensicsAgent",
+                "role": "Cryptographic Git & Code Proof Verification",
+                "cloud_service": "GitHub API + Trust Registry",
+                "memory_enabled": True,
+            },
+            {
+                "id": "3",
+                "name": "GreenhouseScorecardAgent",
+                "role": "4-Dimension Candidate Rubric & Fit Evaluation",
+                "cloud_service": "Greenhouse Scorecard Engine + Gemini Flash",
+                "memory_enabled": True,
+            },
+            {
+                "id": "4",
+                "name": "LifecycleTrackerAgent",
+                "role": "Live Real-Time Application Kanban & Stage Sync",
+                "cloud_service": "Cloud Firestore Native Mode",
+                "memory_enabled": True,
+            },
+            {
+                "id": "5",
+                "name": "AdaptiveDraftingAgent",
+                "role": "Personalized Outreach with Mistake Correction Injection",
+                "cloud_service": "Gemini 3.6 Flash + Episodic Memory",
+                "memory_enabled": True,
+            },
+            {
+                "id": "6",
+                "name": "ScheduledNudgeAgent",
+                "role": "Follow-Up & Interview Preparation Scheduler",
+                "cloud_service": "Google Cloud Tasks",
+                "memory_enabled": False,
+            },
+            {
+                "id": "7",
+                "name": "ReflectionLearningAgent",
+                "role": "Continuous Learning from Rejections & User Feedback",
+                "cloud_service": "GitProof Lesson Distillation Engine",
+                "memory_enabled": True,
+            },
+        ],
+    }
+
+
+@app.post("/api/memory/feedback")
+def submit_agent_feedback(req: FeedbackSubmitRequest):
+    """Submit human correction/feedback on an agent's output, triggering the reflection distillation loop."""
+    try:
+        res = global_orchestrator.submit_feedback_and_learn(
+            agent_name=req.agent_name,
+            user_correction=req.user_correction,
+            feedback_type=req.feedback_type or "USER_CORRECTION",
+            application_id=req.application_id,
+            desired_behavior=req.desired_behavior,
+        )
+        return res
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "FEEDBACK_SUBMISSION_FAILED", "message": str(e)}
+        )
+
+
+@app.get("/api/memory/lessons")
+def get_memory_lessons(agent_name: Optional[str] = None):
+    """Retrieve distilled persistent lessons and behavioral rules learned by agents."""
+    try:
+        lessons = global_memory_manager.get_active_lessons(agent_name=agent_name)
+        return {
+            "success": True,
+            "count": len(lessons),
+            "lessons": [lesson.model_dump() for lesson in lessons],
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "LESSONS_FETCH_FAILED", "message": str(e)}
+        )
+
+
+@app.post("/api/scorecard/generate")
+def generate_greenhouse_scorecard(req: ScorecardGenerateRequest):
+    """Generate a Greenhouse-standard 4-dimension candidate scorecard."""
+    try:
+        scorecard = global_scorecard_engine.evaluate_candidate(
+            job_description=req.job_description or "Full-stack engineer with TypeScript, React, Python, and cloud infrastructure.",
+            candidate_profile=req.candidate_profile or {"skills": ["TypeScript", "Python", "React", "Docker"]},
+            stage=req.stage or "Technical Screen",
+            company=req.company or "TechCorp",
+            role=req.job_title or "Full Stack Engineer",
+        )
+        return {"success": True, "scorecard": scorecard.model_dump()}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "SCORECARD_GENERATION_FAILED", "message": str(e)}
+        )
+
+
+from gmail_service import global_gmail_service
+from adk.shortlist_engine import global_shortlist_engine
+
+
+class GmailConnectRequest(BaseModel):
+    email: Optional[str] = "off.utkarsh.sinha@gmail.com"
+    pubsub_topic: Optional[str] = "gmail-ingest-topic"
+
+
+class ShortlistPredictRequest(BaseModel):
+    company: str
+    role: str
+    stage: Optional[str] = "Applied"
+    email_body: Optional[str] = None
+    skills: Optional[List[str]] = None
+    proof_score: Optional[int] = 96
+
+
+class GmailTokenRequest(BaseModel):
+    access_token: str
+    refresh_token: Optional[str] = None
+    expires_in: Optional[int] = 3600
+
+
+class RawEmailIngestRequest(BaseModel):
+    sender: str
+    subject: str
+    body: str
+    received_at: Optional[str] = None
+
+
+@app.post("/api/gmail/token")
+def set_gmail_token(req: GmailTokenRequest):
+    """Save user Gmail OAuth access token for direct Gmail REST API v1 mailbox queries."""
+    global_gmail_service.save_token(
+        access_token=req.access_token,
+        refresh_token=req.refresh_token,
+        expires_in=req.expires_in or 3600
+    )
+    return {"success": True, "message": "Gmail token stored successfully"}
+
+
+@app.post("/api/gmail/ingest-raw")
+def ingest_raw_email(req: RawEmailIngestRequest):
+    """Dynamically parse and score any incoming raw email in real time."""
+    app = global_gmail_service.process_dynamic_raw_email(
+        sender=req.sender,
+        subject=req.subject,
+        body=req.body,
+        received_at=req.received_at
+    )
+    return {"success": True, "application": app.model_dump()}
+
+
+@app.post("/api/gmail/connect")
+def connect_gmail_mailbox(req: GmailConnectRequest):
+    """Connect user email (off.utkarsh.sinha@gmail.com) and register Cloud Pub/Sub watch."""
+    global_gmail_service.user_email = req.email or "off.utkarsh.sinha@gmail.com"
+    return global_gmail_service.get_connection_status()
+
+
+@app.get("/api/gmail/status")
+def get_gmail_status():
+    """Retrieve the real-time Gmail connection, Pub/Sub watch status, and tracked applications."""
+    return global_gmail_service.get_connection_status()
+
+
+@app.post("/api/gmail/sync")
+def sync_gmail_applications(limit: int = 12):
+    """Scan connected mailbox for historical & active job applications, compute shortlist probability, and sync to Firestore."""
+    try:
+        apps = global_gmail_service.scan_and_sync_mailbox(limit=limit)
+        return {
+            "success": True,
+            "connected_email": global_gmail_service.user_email,
+            "synced_count": len(apps),
+            "synced_at": datetime.now(timezone.utc).isoformat(),
+            "applications": [a.model_dump() for a in apps],
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "GMAIL_SYNC_FAILED", "message": str(e)}
+        )
+
+
+@app.post("/api/shortlist/predict")
+def predict_shortlist_probability(req: ShortlistPredictRequest):
+    """Compute AI Shortlisting Probability Score for any job application."""
+    try:
+        res = global_shortlist_engine.predict_shortlist_probability(
+            company=req.company,
+            role=req.role,
+            stage=req.stage or "Applied",
+            email_body=req.email_body,
+            candidate_skills=req.skills or ["TypeScript", "Python", "React", "Cloud Architecture"],
+            proof_score=req.proof_score or 96,
+        )
+        return {"success": True, "prediction": res.model_dump()}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "SHORTLIST_PREDICTION_FAILED", "message": str(e)}
+        )
 
 
 @app.post("/api/credentials/verify")
@@ -327,3 +641,5 @@ def get_registry():
 
 
 app.mount("/gitproof", gitproof_app)
+
+

@@ -16,13 +16,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Signal — Autonomous Multi-Agent Career Pipeline",
-    template: "%s | Signal",
+    default: "SIGNAL — Simplified Information for Guiding Networked Applications & Leads",
+    template: "%s | SIGNAL",
   },
   description:
-    "Autonomous multi-agent career pipeline orchestrating recruiter email parsing, MINSKY code forensics, semantic skill gap analysis, live Kanban tracking, and AI drafting.",
+    "SIGNAL (Simplified Information for Guiding Networked Applications & Leads): Autonomous multi-agent career pipeline orchestrating recruiter email parsing, MINSKY code forensics, semantic skill gap analysis, live Kanban tracking, and AI drafting.",
   keywords: [
-    "Signal",
+    "SIGNAL",
+    "Simplified Information for Guiding Networked Applications & Leads",
     "multi-agent pipeline",
     "skill passport",
     "github forensics",
@@ -32,21 +33,26 @@ export const metadata: Metadata = {
     "skill verification",
     "professional identity",
   ],
-  authors: [{ name: "Signal" }],
+  authors: [{ name: "SIGNAL" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: process.env.NEXT_PUBLIC_APP_URL,
-    title: "Signal — Autonomous Multi-Agent Career Pipeline",
+    title: "SIGNAL — Simplified Information for Guiding Networked Applications & Leads",
     description:
-      "Autonomous multi-agent career workflow orchestrating recruiter ingestion, MINSKY code forensics, real-time Kanban, and AI drafting.",
-    siteName: "Signal",
+      "SIGNAL (Simplified Information for Guiding Networked Applications & Leads): Autonomous multi-agent career workflow orchestrating recruiter ingestion, MINSKY code forensics, real-time Kanban, and AI drafting.",
+    siteName: "SIGNAL",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Signal — Autonomous Multi-Agent Career Pipeline",
+    title: "SIGNAL — Simplified Information for Guiding Networked Applications & Leads",
     description:
-      "Autonomous multi-agent career workflow orchestrating recruiter ingestion, MINSKY code forensics, real-time Kanban, and AI drafting.",
+      "SIGNAL (Simplified Information for Guiding Networked Applications & Leads): Autonomous multi-agent career workflow orchestrating recruiter ingestion, MINSKY code forensics, real-time Kanban, and AI drafting.",
+  },
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/favicon.ico",
+    apple: "/logo.png",
   },
 };
 

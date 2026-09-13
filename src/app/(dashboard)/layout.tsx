@@ -11,7 +11,7 @@ export default function DashboardLayout({
       <Sidebar />
 
       {/* Main Workspace Viewport */}
-      <main className="flex-1 overflow-y-auto relative bg-[#ffffff] m-2 ml-0 rounded-2xl border border-zinc-200/80 shadow-sm z-10 scroll-smooth">
+      <main className="flex-1 overflow-y-auto relative bg-[#ffffff] m-2 ml-0 rounded-2xl border border-zinc-200/80 shadow-sm z-10 will-change-[contents] subpixel-antialiased">
         {children}
       </main>
     </div>

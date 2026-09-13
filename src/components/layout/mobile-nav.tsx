@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import { dashboardNav } from "@/config/navigation";
-import { Shield } from "lucide-react";
+import { SignalLogo } from "@/components/ui/signal-logo";
 import { UserMenu } from "@/components/layout/user-menu";
 
 interface MobileNavProps {
@@ -19,11 +19,9 @@ export function MobileNav({ user }: MobileNavProps) {
     <div className="flex h-full flex-col bg-sidebar">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 border-b border-border/50 px-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Shield className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">Signal</span>
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <SignalLogo size={28} rounded="rounded-lg" />
+          <span className="text-lg font-bold tracking-tight text-zinc-950">SIGNAL</span>
         </Link>
       </div>
 

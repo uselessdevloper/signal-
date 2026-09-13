@@ -191,189 +191,191 @@ export function RoleCompetencyAnalyzer({
   return (
     <div
       className={cn(
-        "w-full bg-[#0d1322] border border-[#1e2a4a] rounded-3xl p-6 sm:p-8 text-white font-sans shadow-2xl space-y-8",
+        "w-full bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 text-zinc-900 font-sans shadow-sm space-y-8",
         className
       )}
     >
-      {/* Header & Role Selector */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/[0.08]">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            Target Role Intelligence & Stack Mapping
+      <div className="space-y-8 animate-fade-in text-zinc-900">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              Target Role Intelligence & Stack Mapping
+            </div>
+            <h2 className="text-2xl font-extrabold tracking-tight text-zinc-900 flex items-center gap-2">
+              Career Competency & Language Requirements
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-500 max-w-xl mt-1">
+              See all mandatory languages, databases, and microservice architectures required for your goal, matched against your scanned repositories.
+            </p>
           </div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            Career Competency & Language Requirements
-          </h2>
-          <p className="text-xs sm:text-sm text-white/60 max-w-xl mt-1">
-            See all mandatory languages, databases, and microservice architectures required for your goal, matched against your scanned repositories.
-          </p>
+
+          {/* Role Switcher Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 bg-zinc-100 p-1.5 rounded-2xl border border-zinc-200">
+            {ROLES.map((r) => {
+              const Icon = r.icon;
+              const isSelected = r.id === selectedRoleId;
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setSelectedRoleId(r.id)}
+                  className={cn(
+                    "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                    isSelected
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/50"
+                  )}
+                >
+                  <Icon className="w-4 h-4 text-zinc-600" />
+                  {r.title}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Role Switcher Pills */}
-        <div className="flex flex-wrap items-center gap-2 bg-[#070b14] p-1.5 rounded-2xl border border-white/[0.06]">
-          {ROLES.map((r) => {
-            const Icon = r.icon;
-            const isSelected = r.id === selectedRoleId;
-            return (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setSelectedRoleId(r.id)}
-                className={cn(
-                  "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all",
-                  isSelected
-                    ? "bg-white text-zinc-950 shadow-md"
-                    : "text-white/60 hover:text-white hover:bg-white/[0.05]"
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                {r.title}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        {/* Selected Role Summary & Match Gauge */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left 2 Cols: Role Description & Language Matrix */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="p-5 rounded-2xl bg-white border border-zinc-200/80 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
+                    <activeRole.icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-900">{activeRole.title}</h3>
+                    <span className="text-xs text-zinc-500">{activeRole.category}</span>
+                  </div>
+                </div>
 
-      {/* Selected Role Summary & Match Gauge */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Role Description & Language Matrix */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="p-5 rounded-2xl bg-[#121a2e] border border-[#213054] space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                  <activeRole.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">{activeRole.title}</h3>
-                  <span className="text-xs text-white/50">{activeRole.category}</span>
-                </div>
+                <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">
+                  {matchPercent}% Role Fit
+                </span>
               </div>
 
-              <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                {matchPercent}% Role Fit
-              </span>
+              <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">{activeRole.description}</p>
             </div>
 
-            <p className="text-xs sm:text-sm text-white/70 leading-relaxed">{activeRole.description}</p>
-          </div>
+            {/* Programming Languages Breakdown (Core / Required) */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-2">
+                <Code2 className="w-4 h-4 text-blue-600" />
+                Programming Languages Required for {activeRole.title}
+              </h4>
 
-          {/* Programming Languages Breakdown (Core / Required) */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-blue-400" />
-              Programming Languages Required for {activeRole.title}
-            </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {activeRole.requiredLanguages.map((lang, idx) => {
+                  const isMatched = matchedLangs.some((m) => m.name === lang.name);
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {activeRole.requiredLanguages.map((lang, idx) => {
-                const isMatched = matchedLangs.some((m) => m.name === lang.name);
-
-                return (
-                  <div
-                    key={idx}
-                    className={cn(
-                      "p-3.5 rounded-2xl border flex items-center justify-between transition-all",
-                      isMatched
-                        ? "bg-[#121f38] border-emerald-500/30"
-                        : "bg-[#121a2e] border-white/[0.08]"
-                    )}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      {isMatched ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-amber-400/80 flex-shrink-0" />
-                      )}
-                      <div>
-                        <span className="text-sm font-bold text-white block">{lang.name}</span>
-                        <span className="text-[10px] text-white/50 font-medium">{lang.importance}</span>
-                      </div>
-                    </div>
-
-                    <span
+                  return (
+                    <div
+                      key={idx}
                       className={cn(
-                        "text-[11px] font-bold px-2 py-0.5 rounded-md",
+                        "p-3.5 rounded-xl border flex items-center justify-between transition-all shadow-2xs",
                         isMatched
-                          ? "bg-emerald-500/20 text-emerald-300"
-                          : "bg-amber-500/15 text-amber-300"
+                          ? "bg-emerald-50/40 border-emerald-200"
+                          : "bg-zinc-50/60 border-zinc-200"
                       )}
                     >
-                      {isMatched ? "VERIFIED IN REPOS" : "MISSING SKILL"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                      <div className="flex items-center gap-2.5">
+                        {isMatched ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                        )}
+                        <div>
+                          <span className="text-sm font-bold text-zinc-900 block">{lang.name}</span>
+                          <span className="text-[10px] text-zinc-500 font-medium">{lang.importance}</span>
+                        </div>
+                      </div>
 
-          {/* Databases, Frameworks & Infrastructure */}
-          <div className="space-y-3 pt-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 flex items-center gap-2">
-              <Database className="w-4 h-4 text-purple-400" />
-              Databases, Frameworks & Infrastructure
-            </h4>
-
-            <div className="flex flex-wrap gap-2">
-              {activeRole.requiredDatabasesAndInfra.map((item, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs text-white/90 font-medium flex items-center gap-1.5"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                  {item}
-                </span>
-              ))}
-
-              {activeRole.requiredFrameworks.map((fw, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs text-white/90 font-medium flex items-center gap-1.5"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  {fw}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Col: Curated Project Roadmap to Bridge Missing Skills */}
-        <div className="space-y-4 bg-[#10172a] border border-[#202e52] rounded-3xl p-5 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-white/50 uppercase">
-              <Flame className="w-4 h-4 text-amber-400" />
-              Bridge Missing Skills (Tailored Projects)
+                      <span
+                        className={cn(
+                          "text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider font-mono",
+                          isMatched
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-amber-100 text-amber-800"
+                        )}
+                      >
+                        {isMatched ? "VERIFIED IN REPOS" : "MISSING SKILL"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            <p className="text-xs text-white/60">
-              Build these targeted production architectures to demonstrate the remaining required {activeRole.title} languages in your passport:
-            </p>
+            {/* Databases, Frameworks & Infrastructure */}
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-2">
+                <Database className="w-4 h-4 text-purple-600" />
+                Databases, Frameworks & Infrastructure
+              </h4>
 
-            <div className="space-y-3 mt-2">
-              {activeRole.suggestedRoadmapProjects.map((proj, idx) => (
-                <div
-                  key={idx}
-                  className="p-3.5 rounded-2xl bg-[#090e1a] border border-white/[0.06] hover:border-blue-500/40 transition-colors space-y-1.5 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <h5 className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors">
-                      {proj.title}
-                    </h5>
-                  </div>
-                  <span className="text-[10px] font-mono text-blue-400 block font-semibold">
-                    {proj.tech}
+              <div className="flex flex-wrap gap-2">
+                {activeRole.requiredDatabasesAndInfra.map((item, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs text-zinc-800 font-medium flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    {item}
                   </span>
-                  <p className="text-[11px] text-white/60 leading-relaxed">{proj.description}</p>
-                </div>
-              ))}
+                ))}
+
+                {activeRole.requiredFrameworks.map((fw, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs text-zinc-800 font-medium flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    {fw}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 flex items-center justify-between mt-4">
-            <span className="font-semibold">All projects sync to GitProof</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          {/* Right Col: Curated Project Roadmap to Bridge Missing Skills */}
+          <div className="space-y-4 bg-white border border-zinc-200/80 rounded-2xl p-5 flex flex-col justify-between shadow-2xs">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-zinc-700 uppercase">
+                <Flame className="w-4 h-4 text-amber-500" />
+                Bridge Missing Skills (Tailored Projects)
+              </div>
+
+              <p className="text-xs text-zinc-500">
+                Build these targeted production architectures to demonstrate the remaining required {activeRole.title} languages in your passport:
+              </p>
+
+              <div className="space-y-2.5 mt-2">
+                {activeRole.suggestedRoadmapProjects.map((proj, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3.5 rounded-xl bg-zinc-50/70 border border-zinc-200/80 hover:border-zinc-300 transition-colors space-y-1.5 group shadow-2xs"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h5 className="text-xs font-bold text-zinc-900 group-hover:text-blue-700 transition-colors">
+                        {proj.title}
+                      </h5>
+                    </div>
+                    <span className="text-[10px] font-mono text-blue-700 block font-semibold">
+                      {proj.tech}
+                    </span>
+                    <p className="text-[11px] text-zinc-600 leading-relaxed">{proj.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center justify-between mt-4">
+              <span className="font-semibold">All projects sync to GitProof</span>
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            </div>
           </div>
         </div>
       </div>

@@ -38,40 +38,40 @@ export function AiCoachInsight({ result, passportSnapshot }: { result: MatchResu
         variant="ghost" 
         size="sm" 
         onClick={handleAskCoach}
-        className="w-full flex items-center justify-between text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
+        className="w-full flex items-center justify-between text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-xl"
       >
-        <span className="flex items-center gap-2 font-semibold">
-          <Bot className="w-4 h-4" />
-          {insight ? "View AI Coach Analysis" : "Ask AI Coach for Match Analysis"}
+        <span className="flex items-center gap-2 font-semibold text-xs">
+          <Bot className="w-3.5 h-3.5 text-emerald-600" />
+          {insight ? "View AI Strategy Insight" : "Get AI Match Analysis for this Role"}
         </span>
         {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
         ) : (
-          insight && (isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)
+          insight && (isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />)
         )}
       </Button>
 
       {isOpen && (
-        <div className="mt-4 glass bg-emerald-500/5 border border-emerald-500/20 rounded-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200">
-          <div className="p-5 relative">
+        <div className="mt-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200">
+          <div className="p-4 relative">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-8 text-emerald-400/70 space-y-3">
-                <Sparkles className="w-6 h-6 animate-pulse" />
-                <p className="text-sm font-medium animate-pulse tracking-wide">Analyzing semantic match...</p>
+              <div className="flex flex-col items-center justify-center py-6 text-emerald-700 space-y-2">
+                <Sparkles className="w-5 h-5 animate-pulse text-emerald-600" />
+                <p className="text-xs font-medium animate-pulse tracking-wide">Analyzing semantic skill match...</p>
               </div>
             ) : error ? (
-              <p className="text-sm text-rose-400 font-medium">{error}</p>
+              <p className="text-xs text-rose-600 font-medium">{error}</p>
             ) : (
-              <div className="prose prose-sm prose-invert prose-emerald max-w-none">
+              <div className="prose prose-sm prose-emerald max-w-none text-zinc-700 text-xs">
                 <ReactMarkdown
                   components={{
-                    h1: ({node, ...props}) => <h3 className="text-lg font-bold text-emerald-300 mt-0" {...props} />,
-                    h2: ({node, ...props}) => <h4 className="text-md font-semibold text-emerald-300 mt-4 mb-2" {...props} />,
-                    h3: ({node, ...props}) => <h5 className="text-sm font-semibold text-emerald-300 mt-3 mb-1" {...props} />,
-                    p: ({node, ...props}) => <p className="text-white/70 leading-relaxed mb-3" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-4 text-white/60 space-y-1" {...props} />,
-                    li: ({node, ...props}) => <li className="" {...props} />,
-                    strong: ({node, ...props}) => <strong className="text-emerald-200 font-semibold" {...props} />,
+                    h1: ({node, ...props}) => <h4 className="text-xs font-bold text-zinc-900 mt-1 mb-1" {...props} />,
+                    h2: ({node, ...props}) => <h5 className="text-xs font-semibold text-zinc-900 mt-2 mb-1" {...props} />,
+                    h3: ({node, ...props}) => <h6 className="text-xs font-semibold text-zinc-800 mt-2 mb-1" {...props} />,
+                    p: ({node, ...props}) => <p className="text-zinc-700 leading-relaxed mb-2" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 text-zinc-700 space-y-0.5" {...props} />,
+                    li: ({node, ...props}) => <li className="text-zinc-700" {...props} />,
+                    strong: ({node, ...props}) => <strong className="text-zinc-900 font-semibold" {...props} />,
                   }}
                 >
                   {insight || ""}

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { SignalLogo } from "@/components/ui/signal-logo";
 import {
   Zap,
   Kanban,
@@ -25,6 +26,7 @@ import {
 // Isolated Tagline Rotator (zero re-render of parent stage)
 const TaglineRotator = memo(function TaglineRotator() {
   const TAGLINES = [
+    "SIMPLIFIED INFORMATION FOR GUIDING NETWORKED APPLICATIONS & LEADS",
     "TRACK 03 · AUTONOMOUS AI JOB APPLICATION TRACKER",
     "6-AGENT LANGGRAPH PIPELINE ON GOOGLE CLOUD",
     "EMAIL PARSING · MINSKY GITPROOF · REAL-TIME KANBAN",
@@ -289,9 +291,7 @@ export default function GhostLandingPage() {
             onClick={() => setPage(1)}
             className="flex items-center gap-2.5 text-white text-xs font-mono font-bold tracking-widest uppercase hover:opacity-80 transition-opacity cursor-pointer text-left"
           >
-            <div className="w-4 h-4 rounded bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-sm">
-              <Zap className="w-2.5 h-2.5 text-white" />
-            </div>
+            <SignalLogo size={20} rounded="rounded-sm" className="border-white/30" />
             <span>SIGNAL · AI JOB TRACKER</span>
           </button>
 
@@ -320,8 +320,8 @@ export default function GhostLandingPage() {
             </div>
 
             {page === 1 && (
-              <p className="text-white/85 font-mono text-xs sm:text-sm tracking-[0.28em] uppercase mt-2 font-medium">
-                Autonomous Multi-Agent Career Pipeline
+              <p className="text-white/85 font-mono text-[11px] sm:text-xs tracking-[0.2em] uppercase mt-2 font-medium text-center max-w-xl">
+                Simplified Information for Guiding Networked Applications & Leads
               </p>
             )}
           </div>
@@ -431,7 +431,7 @@ export default function GhostLandingPage() {
 
                   {/* Solution Manifesto */}
                   <p>
-                    <strong>Signal changes this completely.</strong> An autonomous <strong>LangGraph multi-agent pipeline</strong> running natively on Google Cloud orchestrates the complete student career workflow from first application to final offer:
+                    <strong>SIGNAL (Simplified Information for Guiding Networked Applications & Leads) changes this completely.</strong> An autonomous <strong>LangGraph multi-agent pipeline</strong> running natively on Google Cloud orchestrates the complete student career workflow from first application to final offer:
                   </p>
                 </div>
 
@@ -569,7 +569,7 @@ export default function GhostLandingPage() {
               <footer className="ghost-footer-metal rounded-2xl p-6 sm:p-10 text-white/80 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex flex-col items-center md:items-start text-center md:text-left">
                   <div className="flex items-center gap-2 mb-1">
-                    <Zap className="w-4 h-4 text-white" />
+                    <SignalLogo size={20} rounded="rounded-sm" className="border-white/30" />
                     <span className="text-sm font-bold text-white tracking-widest font-mono uppercase">
                       SIGNAL
                     </span>

@@ -1,198 +1,221 @@
 <div align="center">
 
-# Signal
+<img src="public/logo.png" width="96" height="96" alt="SIGNAL Logo" style="border-radius: 20px;" />
 
-**Autonomous AI Job Application Tracker & Career Forensics Platform**
+# SIGNAL
 
-An end-to-end multi-agent orchestration pipeline powered by LangGraph, Gemini 2.5 Flash, Google Cloud Platform, and Next.js.
+### **S**implified **I**nformation for **G**uiding **N**etworked **A**pplications & **L**eads
+
+**Autonomous AI Job Application Tracker, Career Copilot & GitProof Telemetry Engine**
+
+An end-to-end multi-agent orchestration platform built with Google Cloud Platform, LangGraph, Gemini 2.5 Flash, Cloud Pub/Sub, Cloud Firestore, Cloud Tasks, and Next.js 16.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3.1-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python)](https://www.python.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-8E75B2?style=flat-square&logo=googlegemini)](https://deepmind.google/technologies/gemini/)
+[![Google Cloud](https://img.shields.io/badge/Google_Cloud-Pub%2FSub_%7C_Firestore_%7C_Tasks_%7C_Run-4285F4?style=flat-square&logo=googlecloud)](https://cloud.google.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-## Overview
+## 📖 Overview
 
-Signal resolves the core inefficiencies of modern technical job hunting: manual application tracking, unverified resume claims, ATS filtering, and missed follow-up deadlines. By leveraging a 6-agent LangGraph workflow running on Google Cloud Platform, Signal automates email parsing, performs dual-path code verification (MINSKY/GitProof), conducts semantic skill gap analysis, generates evidence-backed recruiter outreach, and dispatches automated interview alerts.
+**SIGNAL** (**S**implified **I**nformation for **G**uiding **N**etworked **A**pplications & **L**eads) eliminates the friction, ATS black-boxes, and manual overhead of modern technical job hunting.
+
+Instead of manual spreadsheets and unverified claims, SIGNAL combines **real-time recruiter email ingestion**, **cryptographic repository forensics (GitProof/MINSKY)**, **semantic ATS matching**, and **automated follow-up dispatchers** into an autonomous 6-agent system natively engineered on Google Cloud.
 
 ---
 
-## Architecture
+## ⚡ Key Highlights & Core Capabilities
 
-Signal is powered by a 6-agent autonomous pipeline built with LangGraph and FastAPI, interacting asynchronously with Google Cloud services and a Next.js 16 frontend.
+- 🎯 **Autonomous 6-Agent LangGraph Pipeline**: Ingests recruiter emails, parses application status transitions, performs semantic gap analysis, drafts outreach, and enqueues follow-up nudges.
+- 🔬 **GitProof / MINSKY Code Forensics**: Verifies real engineering telemetry via GPG/SSH commit signatures, commit velocity, AST diffs, and pull request audits, outputting verifiable proof scores (0–100).
+- 📋 **Zero-Latency Kanban Board**: Instant (<5ms) optimistic UI transitions across `Applied`, `Interviewing`, `Offer`, `Rejected`, and `Ghosted` stages with automated Gmail sync.
+- 🎓 **Verified Skill Passport & Zero-Mock Certificates**: Strict, cryptographic certificate and credential verification with zero synthetic fallback data—unverified entries accurately show "No certificate exists".
+- 💼 **Smart Internship & Job Matcher**: Real-time role recommendation engine matching developer telemetry and verified skills against live open technical positions.
+- 🔌 **Seamless Integration Hub**: Direct, single-click connections to Gmail (email event streaming), GitHub (repository telemetry & GitProof), LinkedIn, and Google Cloud Identity.
+
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
-flowchart LR
-    PubSub[Cloud Pub/Sub\nGmail Webhook] --> A1[1. Email Ingestion Agent]
-    A1 --> A2[2. MINSKY Code Forensics]
-    A2 --> A3[3. Career Optimization Agent]
-    A3 --> A4[4. Live Tracking Agent]
-    A4 --> A5[5. AI Outreach Drafting Agent]
-    A5 --> A6[6. Scheduled Nudge Agent]
+flowchart TD
+    subgraph Ingestion["Google Cloud Event Ingestion"]
+        PubSub["Cloud Pub/Sub\n(Gmail Webhook)"] --> A1["1. Email Ingestion Agent\n(Gemini 2.5 Flash)"]
+    end
+
+    subgraph LangGraph["6-Agent Autonomous LangGraph Engine"]
+        A1 --> A2["2. MINSKY / GitProof Forensics\n(Codebase & Commit Telemetry)"]
+        A2 --> A3["3. Career Optimization Agent\n(Semantic ATS Gap Analysis)"]
+        A3 --> A4["4. Live Tracking Agent\n(Cloud Firestore Sync)"]
+        A4 --> A5["5. AI Outreach Drafter\n(Personalized Proof Letters)"]
+        A5 --> A6["6. Scheduled Nudge Agent\n(Cloud Tasks Queue)"]
+    end
+
+    subgraph CloudInfra["Google Cloud Infrastructure"]
+        Firestore[("Cloud Firestore\n(Real-time State)")] <--> A4
+        CloudTasks["Cloud Tasks\n(signal-interview-alerts)"] <--> A6
+        CloudRun["Cloud Run\n(FastAPI Backend)"] --- LangGraph
+    end
+
+    subgraph Frontend["Next.js 16 Client (App Router)"]
+        Kanban["Interactive Kanban Board"]
+        Passport["Verified Skill Passport"]
+        Matcher["Internship Matcher"]
+        Integrations["Integrations Hub"]
+    end
+
+    A4 --> Frontend
 ```
 
-### Agent Pipeline Breakdown
+---
 
-| Agent | Module | Description |
+## 🤖 6-Agent LangGraph Breakdown
+
+| Agent | Module | Role & Responsibility |
 |---|---|---|
-| 1. Email Ingestion | `AgentIngestion` | Captures recruiter communications via Cloud Pub/Sub webhooks, parses application status changes, and extracts interview dates. |
-| 2. MINSKY (GitProof) | `AgentMinsky` | Conducts dual-path repository forensics: cryptographic signature verification (GPG/SSH) and heuristics analysis (commit velocity, PR reviews, AST breakdown) to output a 0-100 proof score. |
-| 3. Career Optimization | `AgentOptimizer` | Performs semantic matching between verified MINSKY proof badges and target job descriptions, providing ATS keyword alignment score. |
-| 4. Live Tracking | `AgentTracker` | Manages Kanban state synchronization across `Applied`, `Screening`, `Interview`, and `Offer` stages backed by Cloud Firestore. |
-| 5. AI Outreach Drafting | `AgentDrafter` | Leverages Gemini 2.5 Flash to draft personalized, proof-backed cover letters and recruiter cold outreach based on verified code metrics. |
-| 6. Scheduled Nudges | `AgentNudge` | Enqueues background notifications and follow-up alerts via Google Cloud Tasks queues. |
+| **1. Email Ingestion** | `AgentIngestion` | Captures incoming recruiter communications from Cloud Pub/Sub, normalizes email threads, extracts interview rounds, and flags status changes using Gemini 2.5 Flash. |
+| **2. MINSKY (GitProof)** | `AgentMinsky` | Conducts dual-path repository forensics: cryptographic signature checks (GPG/SSH) and heuristics analysis (commit velocity, PR reviews, AST diff breakdown) to score developer contributions. |
+| **3. Career Optimization** | `AgentOptimizer` | Performs semantic matching between verified GitProof competencies and job descriptions, identifying ATS keyword gaps and highlighting engineering strengths. |
+| **4. Live Tracking** | `AgentTracker` | Manages real-time state synchronization across Kanban stages (`Applied`, `Screening`, `Interview`, `Offer`, `Rejected`, `Ghosted`) backed by Cloud Firestore. |
+| **5. AI Outreach Drafter** | `AgentDrafter` | Generates proof-backed, personalized recruiter outreach emails and tailored cover letters anchored to verifiable commit metrics. |
+| **6. Scheduled Nudges** | `AgentNudge` | Enqueues background follow-up notifications and interview preparation reminders into Google Cloud Tasks. |
 
 ---
 
-## Google Cloud Platform Integration
+## ☁️ Google Cloud Platform Services
 
-The system architecture utilizes managed Google Cloud services for high scalability and serverless performance:
+SIGNAL is built natively on Google Cloud services for enterprise-grade scalability, security, and low-latency inference:
 
-- **Gemini 2.5 Flash (Vertex AI / Google GenAI SDK)**: Powers intent extraction, semantic gap analysis, structured parsing, and personalized text generation.
-- **Cloud Pub/Sub**: Ingests real-time Gmail event webhooks asynchronously.
-- **Cloud Firestore**: Provides real-time synchronization for Kanban board state and forensic store.
-- **Cloud Tasks**: Handles scheduled queue dispatching for interview prep alerts (`signal-interview-alerts`) and recruiter follow-ups (`signal-recruiter-followup`).
-- **Cloud Run**: Serverless container hosting environment for the FastAPI backend service.
+- **Gemini 2.5 Flash (`gemini-2.5-flash`)**: High-speed multimodal LLM for intent extraction, semantic parsing, and outreach generation via Vertex AI / Google GenAI SDK.
+- **Cloud Pub/Sub**: Event-driven ingestion of Gmail push notifications and application status events.
+- **Cloud Firestore**: Sub-10ms real-time database synchronizing Kanban board state and candidate forensic cards.
+- **Cloud Tasks**: Durable queue scheduling for interview preparation reminders (`signal-interview-alerts`) and recruiter follow-up nudges (`signal-recruiter-followup`).
+- **Cloud Run**: Serverless container execution runtime hosting the FastAPI backend and LangGraph agents.
 
 ---
 
-## Tech Stack
+## 💻 Tech Stack
 
 ### Frontend
 - **Framework**: Next.js 16 (React 19, App Router)
-- **Language**: TypeScript
+- **Language**: TypeScript 5.0+
 - **Styling**: Tailwind CSS v4, Motion (Framer Motion), Tabler Icons, Lucide React
 - **State Management**: Zustand
-- **Database & Auth**: Supabase (PostgreSQL, Supabase Auth)
+- **Database & Auth**: Supabase (PostgreSQL, Supabase Auth, OAuth with Google & GitHub)
 
 ### Backend
 - **Framework**: FastAPI (Python 3.11+)
 - **Agent Framework**: LangGraph, LangChain Google GenAI, Pydantic v2
-- **Database & Cache**: SQLite (GitProof local store), Cloud Firestore
+- **Forensics Engine**: GitProof / MINSKY AST Analyzer, PyGithub, GitPython
+- **Database & Queue**: SQLite (local dev cache), Cloud Firestore, Cloud Tasks
 - **Deployment**: Docker, Google Cloud Run
 
 ---
 
-## Repository Structure
+## 📁 Repository Structure
 
 ```
 signal/
 ├── backend/
+│   ├── adk/                   # Agent Development Kit (Scorecard & Engine)
 │   ├── gitproof/              # MINSKY dual-path code forensics engine
 │   ├── graph.py               # 6-Agent LangGraph workflow execution graph
-│   ├── main.py                # FastAPI endpoints and middleware
-│   ├── Dockerfile             # Cloud Run container configuration
+│   ├── main.py                # FastAPI endpoints and route handlers
+│   ├── Dockerfile             # Production Cloud Run container configuration
 │   └── requirements.txt       # Python dependencies
 ├── src/
-│   ├── app/                   # Next.js App Router (marketing, dashboard, public)
-│   ├── components/            # UI components (Kanban tracker, analytics, widgets)
-│   ├── lib/                   # Supabase client, utility functions, API connectors
-│   └── types/                 # TypeScript interfaces and schema definitions
+│   ├── app/
+│   │   ├── (auth)/            # Authentication routes (Login, Google/GitHub OAuth callback)
+│   │   ├── (dashboard)/       # Dashboard, Kanban Tracker, Internships, Certificates, Integrations
+│   │   └── (marketing)/       # Interactive presentation landing page
+│   ├── components/            # UI components (Kanban board, Skill cards, Modals, Resizable Navbar)
+│   ├── lib/                   # Supabase client, LinkedIn matcher, API clients, utilities
+│   └── types/                 # TypeScript interfaces and database schemas
+├── public/                    # Brand assets, logo, favicons
 ├── supabase-schema.sql        # Database migrations and table schemas
-├── package.json               # Node.js dependencies and scripts
-└── LICENSE                    # MIT License file
+├── package.json               # Node.js dependencies and build scripts
+└── LICENSE                    # MIT License
 ```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - **Node.js**: v20.0.0 or higher
 - **Python**: v3.11 or higher
-- **Docker** (optional, for containerized execution)
-- **Google Cloud Account** with Gemini API access
+- **Docker** (optional, for containerized deployment)
+- **Google Cloud Account** with Gemini API key enabled
 
-### 1. Repository Setup
+---
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/uselessdevloper/signal-.git
 cd signal-
 ```
 
-### 2. Backend Installation & Execution
+---
+
+### 2. Backend Setup (FastAPI + LangGraph)
 
 ```bash
 cd backend
 
-# Create virtual environment
+# Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Environment configuration
+# Configure environment variables
 cp .env.example .env
-# Configure GOOGLE_API_KEY in .env
+# Edit .env and add your GOOGLE_API_KEY
 
-# Run FastAPI server
+# Start the FastAPI server
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-The interactive OpenAPI documentation will be accessible at `http://localhost:8000/docs`.
+The interactive OpenAPI / Swagger documentation will be available at `http://localhost:8000/docs`.
 
-### 3. Frontend Installation & Execution
+---
+
+### 3. Frontend Setup (Next.js 16)
 
 ```bash
-# Return to repository root
+# Return to the repository root
 cd ..
 
 # Install dependencies
 npm install
 
-# Environment configuration
+# Configure frontend environment variables
 cp .env.example .env.local
-# Configure Supabase and Backend API parameters in .env.local
+# Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and NEXT_PUBLIC_BACKEND_URL
 
-# Run Next.js development server
+# Launch Next.js development server
 npm run dev
 ```
 
-Open `http://localhost:3000` in your browser. Navigate to `/dashboard/tracker` for the application tracking board.
-
-### 4. Docker Deployment (Backend)
-
-```bash
-cd backend
-docker build -t signal-backend .
-docker run -p 8000:8080 --env-file .env signal-backend
-```
+Open `http://localhost:3000` in your browser.
+- Marketing & presentation stage: `http://localhost:3000/`
+- Application Tracker: `http://localhost:3000/dashboard/tracker`
+- Verified Skill Passport: `http://localhost:3000/dashboard`
+- Internships & Jobs: `http://localhost:3000/dashboard/internships`
+- Integrations: `http://localhost:3000/dashboard/integrations`
 
 ---
 
-## Environment Variables
-
-### Frontend (`.env.local`)
-
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase API URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anonymous Client Key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Administrative Service Key |
-| `NEXT_PUBLIC_BACKEND_URL` | FastAPI Backend Endpoint (default: `http://localhost:8000`) |
-| `GITHUB_CLIENT_ID` | GitHub OAuth Application Client ID |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth Application Client Secret |
-
-### Backend (`backend/.env`)
-
-| Variable | Description |
-|---|---|
-| `GOOGLE_API_KEY` | Google Gemini API Key |
-| `GITHUB_CLIENT_ID` | GitHub OAuth Client ID for verification API |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth Client Secret for verification API |
-| `SESSION_SECRET` | Secret key for local session encryption |
-
----
-
-## API Reference
+## 📡 API Reference
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -206,6 +229,6 @@ docker run -p 8000:8080 --env-file .env signal-backend
 
 ---
 
-## License
+## 📄 License
 
-Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete license details and terms.
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete details.

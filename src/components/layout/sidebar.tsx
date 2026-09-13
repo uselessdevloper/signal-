@@ -32,18 +32,28 @@ import {
   ExternalLink,
   RefreshCw,
   X,
+  Award,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { SignalLogo } from "@/components/ui/signal-logo";
 
 function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab");
   const router = useRouter();
-  const [userProfile, setUserProfile] = useState<{ name: string; email: string; githubUsername?: string } | null>(null);
-  const [isPluginsModalOpen, setIsPluginsModalOpen] = useState(false);
-  const [activePlugin, setActivePlugin] = useState<"github" | "email" | "firestore" | "gemini">("github");
+  const [userProfile, setUserProfile] = useState<{
+    name: string;
+    email: string;
+    githubUsername?: string;
+    avatarUrl?: string;
+  }>({
+    name: "Utkarsh Sinha",
+    email: "off.utkarsh.sinha@gmail.com",
+    githubUsername: "uselessdevloper",
+    avatarUrl: "https://github.com/uselessdevloper.png",
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,14 +63,25 @@ function SidebarContent() {
       } = await supabase.auth.getUser();
       if (user) {
         const [{ data: profile }, { data: githubConn }] = await Promise.all([
-          supabase.from("profiles").select("full_name").eq("id", user.id).single(),
-          supabase.from("github_connections").select("github_username").or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).maybeSingle(),
+          supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).maybeSingle(),
+          supabase
+            .from("github_connections")
+            .select("github_username, avatar_url")
+            .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+            .maybeSingle(),
         ]);
 
+        const username = githubConn?.github_username || "uselessdevloper";
+        const avatar =
+          githubConn?.avatar_url ||
+          profile?.avatar_url ||
+          `https://github.com/${username}.png`;
+
         setUserProfile({
-          name: profile?.full_name || user.email?.split("@")[0] || "Candidate",
+          name: profile?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Utkarsh Sinha",
           email: user.email || "",
-          githubUsername: githubConn?.github_username || "utkarshsinha",
+          githubUsername: username,
+          avatarUrl: avatar,
         });
       }
     };
@@ -76,51 +97,48 @@ function SidebarContent() {
 
   const navSections = [
     {
-      title: "",
-      items: [
-        { name: "Inbox", href: "/dashboard/tracker?tab=pipeline", tabId: "pipeline", icon: Inbox, badge: "1" },
-        { name: "Agent Chat", href: "/dashboard/tracker?tab=draft", tabId: "draft", icon: MessageSquare },
-        { name: "My Applications", href: "/dashboard/tracker?tab=kanban", tabId: "kanban", icon: User },
-      ],
-    },
-    {
       title: "Workspace",
       items: [
         { name: "Live Kanban", href: "/dashboard/tracker?tab=kanban", tabId: "kanban", icon: Kanban, badge: "Live" },
-        { name: "Agent Pipeline", href: "/dashboard/tracker?tab=pipeline", tabId: "pipeline", icon: Bot, badge: "6 Agents" },
-        { name: "Skill Passport", href: "/dashboard", icon: ShieldCheck },
-        { name: "Find Team", href: "/dashboard/find-team", icon: Users },
-        { name: "Create Teammates", href: "/dashboard/create-teammates", icon: Plus },
-        { name: "Internships", href: "/dashboard/internships", icon: Briefcase },
-        { name: "Certificates", href: "/dashboard/certificates", icon: FileBadge },
+        { name: "Internships", href: "/dashboard/internships", icon: Briefcase, badge: "Matches" },
+        { name: "Certificates", href: "/dashboard/certificates", icon: ShieldCheck, badge: "Verified" },
+        { name: "Skill Passport", href: "/dashboard", icon: Award },
+        { name: "Connected Accounts", href: "/dashboard/integrations", icon: Plug, badge: "Connected" },
       ],
     },
     {
-      title: "Plugins & Integrations",
+      title: "AI Copilot & Agents",
+      items: [
+        { name: "Agent Pipeline", href: "/dashboard/tracker?tab=pipeline", tabId: "pipeline", icon: Bot, badge: "7 Agents" },
+        { name: "AI Scorecard", href: "/dashboard/tracker?tab=scorecard", tabId: "scorecard", icon: BarChart3, badge: "Review" },
+        { name: "AI Outreach", href: "/dashboard/tracker?tab=draft", tabId: "draft", icon: MessageSquare, badge: "Copilot" },
+        { name: "Resume Optimizer", href: "/dashboard/tracker?tab=optimize", tabId: "optimize", icon: Sparkles },
+        { name: "Smart Nudges", href: "/dashboard/tracker?tab=nudges", tabId: "nudges", icon: Zap, badge: "Active" },
+      ],
+    },
+    {
+      title: "Connected Accounts",
       isPluginSection: true,
       items: [
         {
           name: "GitHub",
           pluginKey: "github" as const,
           icon: FolderGit2,
-          status: "Connected",
           tag: userProfile?.githubUsername ? `@${userProfile.githubUsername}` : "Connected",
           isLive: true,
         },
         {
-          name: "Gmail (Pub/Sub)",
+          name: "Gmail Auto-Sync",
           pluginKey: "email" as const,
           icon: Mail,
-          status: "Active",
-          tag: "Pub/Sub",
+          tag: "Active",
           isLive: true,
         },
         {
-          name: "Cloud Firestore",
+          name: "Live Database",
           pluginKey: "firestore" as const,
           icon: Database,
-          status: "Live",
-          tag: "<140ms",
+          tag: "Synced",
           isLive: true,
         },
       ],
@@ -128,8 +146,6 @@ function SidebarContent() {
     {
       title: "Configure",
       items: [
-        { name: "Cloud Runtimes", href: "/dashboard/tracker?tab=nudges", icon: Cpu, badge: "GCP" },
-        { name: "MINSKY Forensics", href: "/dashboard/tracker?tab=minsky", icon: Sparkles },
         { name: "Settings", href: "/settings", icon: Settings },
       ],
     },
@@ -145,26 +161,31 @@ function SidebarContent() {
 
   return (
     <>
-      <aside className="w-[240px] flex-shrink-0 flex flex-col h-full bg-[#fbfcfd] border-r border-zinc-200/80 select-none text-[13px] font-sans antialiased">
-        {/* Workspace Selector Dropdown */}
+      <aside className="w-[248px] flex-shrink-0 flex flex-col h-full bg-[#fbfcfd] border-r border-zinc-200/80 select-none text-[13px] font-sans antialiased">
+        {/* Workspace Brand Header */}
         <div className="p-3 pb-2">
-          <button
-            type="button"
-            onClick={() => setIsPluginsModalOpen(true)}
+          <Link
+            href="/dashboard/integrations"
             className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-zinc-200/60 transition-colors text-left group cursor-pointer"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-6 h-6 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                S
-              </div>
+              <SignalLogo size={28} rounded="rounded-lg" className="group-hover:border-zinc-700 transition-colors shrink-0" />
               <div className="flex flex-col min-w-0">
-                <span className="font-semibold text-zinc-900 text-[13px] truncate">
-                  Signal AI Lab
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-zinc-900 text-[13.5px] tracking-tight truncate leading-tight">
+                    SIGNAL
+                  </span>
+                  <span className="text-[9px] font-mono font-semibold px-1 py-0.2 rounded bg-zinc-100 text-zinc-600 border border-zinc-200/80">
+                    AI
+                  </span>
+                </div>
+                <span className="text-[10px] text-zinc-400 truncate font-sans leading-tight mt-0.5">
+                  Career Copilot
                 </span>
               </div>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-          </button>
+            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-600 transition-colors shrink-0" />
+          </Link>
         </div>
 
         {/* Quick Search & New Action */}
@@ -181,11 +202,11 @@ function SidebarContent() {
             </div>
           </Link>
 
-          <Link href="/dashboard/tracker?tab=pipeline">
+          <Link href="/dashboard/tracker">
             <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-zinc-100/80 text-zinc-600 hover:text-zinc-900 transition-all cursor-pointer">
               <div className="flex items-center gap-2">
                 <Plus className="w-3.5 h-3.5 text-zinc-500" />
-                <span className="text-xs font-medium">New Pipeline Run</span>
+                <span className="text-xs font-medium">Track Application</span>
               </div>
               <span className="text-[10px] font-mono text-zinc-400">C</span>
             </div>
@@ -204,12 +225,12 @@ function SidebarContent() {
                     {sec.title}
                   </h4>
                   {sec.isPluginSection && (
-                    <button
-                      onClick={() => setIsPluginsModalOpen(true)}
+                    <Link
+                      href="/dashboard/integrations"
                       className="text-[10px] text-zinc-400 hover:text-zinc-900 transition-colors cursor-pointer"
                     >
                       Manage
-                    </button>
+                    </Link>
                   )}
                 </div>
               )}
@@ -219,55 +240,67 @@ function SidebarContent() {
 
                 // Plugin Action Item
                 if (sec.isPluginSection) {
+                  const isPluginActive =
+                    pathname === "/dashboard/integrations" && searchParams.get("service") === item.pluginKey;
+
                   return (
-                    <button
+                    <Link
                       key={item.name}
-                      onClick={() => {
-                        setActivePlugin(item.pluginKey);
-                        setIsPluginsModalOpen(true);
-                      }}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 transition-all cursor-pointer text-left"
+                      href={`/dashboard/integrations?service=${item.pluginKey}`}
+                      className={cn(
+                        "w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 transition-all cursor-pointer text-left",
+                        isPluginActive && "bg-zinc-200/70 text-zinc-900 font-semibold shadow-2xs"
+                      )}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <Icon className="w-4 h-4 text-zinc-500" strokeWidth={1.75} />
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <Icon className="w-4 h-4 text-zinc-500 shrink-0" strokeWidth={1.75} />
                         <span className="truncate text-[13px]">{item.name}</span>
                       </div>
 
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+                      <div className="flex items-center gap-1.5 shrink-0 ml-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium whitespace-nowrap">
                           {item.tag}
                         </span>
                       </div>
-                    </button>
+                    </Link>
                   );
                 }
 
                 // Regular Nav Link
-                const isTrackerTab = Boolean(item.tabId);
                 let isActive = false;
-                if (isTrackerTab && pathname === "/dashboard/tracker") {
-                  if (item.tabId === "kanban") {
-                    isActive = currentTab === "kanban" || !currentTab;
-                  } else {
-                    isActive = currentTab === item.tabId;
-                  }
-                } else if (!isTrackerTab) {
+                if (item.tabId) {
+                  isActive = pathname === "/dashboard/tracker" && currentTab === item.tabId;
+                } else {
                   isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
                 }
 
                 return (
-                  <Link key={item.name} href={item.href} className="block">
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    prefetch={true}
+                    onClick={(e) => {
+                      if (pathname === "/dashboard/tracker" && item.tabId) {
+                        e.preventDefault();
+                        window.dispatchEvent(
+                          new CustomEvent("switch-tracker-tab", { detail: item.tabId })
+                        );
+                        window.history.pushState(null, "", item.href);
+                      }
+                    }}
+                    className="block"
+                  >
                     <div
                       className={cn(
-                        "flex items-center justify-between px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 transition-all cursor-pointer",
+                        "flex items-center justify-between px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 transition-all cursor-pointer min-w-0",
                         isActive && "bg-zinc-200/70 text-zinc-900 font-semibold shadow-2xs"
                       )}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <Icon
                           className={cn(
-                            "w-4 h-4 text-zinc-500 transition-colors",
+                            "w-4 h-4 text-zinc-500 shrink-0 transition-colors",
                             isActive && "text-zinc-900"
                           )}
                           strokeWidth={1.75}
@@ -278,7 +311,7 @@ function SidebarContent() {
                       {item.badge && (
                         <span
                           className={cn(
-                            "text-[10px] font-mono px-1.5 py-0.2 rounded-md font-medium",
+                            "text-[10px] font-mono px-1.5 py-0.5 rounded-md font-medium whitespace-nowrap shrink-0 ml-1.5",
                             isActive
                               ? "bg-zinc-300/80 text-zinc-900"
                               : "bg-zinc-100 text-zinc-500 border border-zinc-200/60"
@@ -299,8 +332,24 @@ function SidebarContent() {
         <div className="p-3 border-t border-zinc-200/80 flex flex-col gap-2">
           <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-zinc-100/80 transition-colors">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-zinc-900 text-white font-bold text-xs flex items-center justify-center shadow-sm">
-                {initials}
+              <div className="w-7 h-7 rounded-full bg-zinc-900 text-white font-bold text-xs flex items-center justify-center shadow-2xs overflow-hidden border border-zinc-200/80 shrink-0">
+                {userProfile?.avatarUrl ? (
+                  <img
+                    src={userProfile.avatarUrl}
+                    alt={userProfile.name || "GitHub Account Avatar"}
+                    className="w-full h-full object-cover rounded-full"
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      const target = e.currentTarget as HTMLElement;
+                      target.style.display = "none";
+                      if (target.parentElement) {
+                        target.parentElement.textContent = initials;
+                      }
+                    }}
+                  />
+                ) : (
+                  initials
+                )}
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-zinc-900 truncate">
@@ -320,138 +369,6 @@ function SidebarContent() {
           </div>
         </div>
       </aside>
-
-      {/* ========================================================================= */}
-      {/* CONNECTED PLUGINS & INTEGRATIONS MODAL                                    */}
-      {/* ========================================================================= */}
-      {isPluginsModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xl max-w-xl w-full p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700">
-                  <Plug className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-900">
-                    Connected Plugins & Integrations
-                  </h3>
-                  <p className="text-xs text-zinc-500">Live telemetry and sync status for external services</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsPluginsModalOpen(false)}
-                className="p-1 text-zinc-400 hover:text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Plugin Cards List */}
-            <div className="space-y-3">
-              {/* 1. GitHub Plugin */}
-              <div className="p-4 rounded-xl border border-zinc-200/80 bg-zinc-50/60 flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-900 text-white flex items-center justify-center shadow-xs">
-                    <FolderGit2 className="w-4 h-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-semibold text-zinc-900">GitHub Forensics Plugin</h4>
-                      <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-2.5 h-2.5" /> Connected
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-500">
-                      Syncing repositories for MINSKY code forensics and cryptographic GPG signature validation.
-                    </p>
-                    <p className="text-[11px] font-mono text-zinc-600 pt-0.5">
-                      User: <span className="font-semibold">@{userProfile?.githubUsername || "utkarshsinha"}</span> · Repositories: <span className="font-semibold">3 active</span>
-                    </p>
-                  </div>
-                </div>
-
-                <Link href="/settings">
-                  <button
-                    onClick={() => setIsPluginsModalOpen(false)}
-                    className="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 shadow-2xs transition-colors shrink-0 cursor-pointer"
-                  >
-                    Configure
-                  </button>
-                </Link>
-              </div>
-
-              {/* 2. Gmail / PubSub Plugin */}
-              <div className="p-4 rounded-xl border border-zinc-200/80 bg-zinc-50/60 flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-semibold text-zinc-900">Gmail Ingestion Agent</h4>
-                      <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-2.5 h-2.5" /> Pub/Sub Push Active
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-500">
-                      Cloud Pub/Sub push hook listening to recruiter invitations, interview scheduling, and auto-updating Kanban stage.
-                    </p>
-                    <p className="text-[11px] font-mono text-zinc-600 pt-0.5">
-                      Topic: <span className="font-semibold">signal-gmail-ingest</span> · Auto-Kanban: <span className="font-semibold text-emerald-600">Enabled</span>
-                    </p>
-                  </div>
-                </div>
-
-                <Link href="/dashboard/tracker?tab=pipeline">
-                  <button
-                    onClick={() => setIsPluginsModalOpen(false)}
-                    className="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 shadow-2xs transition-colors shrink-0 cursor-pointer"
-                  >
-                    Simulate
-                  </button>
-                </Link>
-              </div>
-
-              {/* 3. Cloud Firestore Plugin */}
-              <div className="p-4 rounded-xl border border-zinc-200/80 bg-zinc-50/60 flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                    <Database className="w-4 h-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-semibold text-zinc-900">Cloud Firestore Realtime Sync</h4>
-                      <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-2.5 h-2.5" /> &lt;140ms Latency
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-500">
-                      Sub-second document store managing real-time Kanban board state and candidate verification tokens.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => toast.success("Firestore stream latency: 118ms (Healthy)")}
-                  className="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 shadow-2xs transition-colors shrink-0 cursor-pointer"
-                >
-                  Test Ping
-                </button>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => setIsPluginsModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm transition-colors cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

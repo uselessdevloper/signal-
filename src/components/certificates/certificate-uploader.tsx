@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadCertificateMetadata, verifyCredlyBadge, verifyOpenBadge } from "@/actions/certificates";
 import { toast } from "sonner";
-import { Loader2, UploadCloud, FileType2, Award, CheckCircle2, ShieldCheck, Link2 } from "lucide-react";
+import { Loader2, UploadCloud, FileType2, Award, CheckCircle2, ShieldCheck, Link2, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,16 +16,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+import { useRouter } from "next/navigation";
+
 export function CertificateUploader({ children }: { children?: React.ReactNode }) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [uploadMode, setUploadMode] = useState<"file" | "credly">("credly");
   const [isUploading, setIsUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [issuer, setIssuer] = useState("");
   const [credlyUrl, setCredlyUrl] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMessage(null);
     if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0];
       if (selected.size > 5 * 1024 * 1024) {
@@ -45,16 +50,23 @@ export function CertificateUploader({ children }: { children?: React.ReactNode }
 
     try {
       setIsUploading(true);
+      setErrorMessage(null);
       const res = await verifyCredlyBadge(credlyUrl.trim());
       if (res.success && res.badge) {
         toast.success(`Verified: ${res.badge.title} (${res.badge.issuer})`);
         setIsOpen(false);
         setCredlyUrl("");
+        setErrorMessage(null);
+        router.refresh();
       } else {
-        toast.error(res.error || "Failed to verify Credly badge.");
+        const errText = res.error || "No certificate exists for this Credly badge ID or URL.";
+        setErrorMessage(errText);
+        toast.error(errText);
       }
     } catch (err: any) {
-      toast.error(err?.message || "Verification failed.");
+      const errText = err?.message || "No certificate exists or verification failed.";
+      setErrorMessage(errText);
+      toast.error(errText);
     } finally {
       setIsUploading(false);
     }
@@ -104,24 +116,33 @@ export function CertificateUploader({ children }: { children?: React.ReactNode }
       });
 
       if (!result.success) {
-        throw new Error(result.error || "Server processing failed.");
+        throw new Error(result.error || "No certificate exists or could be validated from this document. No certificate was added.");
       }
 
       toast.success("Certificate uploaded and verified successfully!");
       setIsOpen(false);
+      setErrorMessage(null);
       
       setFile(null);
       setTitle("");
       setIssuer("");
     } catch (error: any) {
-      toast.error(error.message || "Failed to upload certificate");
+      const errText = error.message || "No certificate exists or could be validated from this document.";
+      setErrorMessage(errText);
+      toast.error(errText);
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) setErrorMessage(null);
+      }}
+    >
       <DialogTrigger render={
         children ? (
           children as React.ReactElement
@@ -143,11 +164,27 @@ export function CertificateUploader({ children }: { children?: React.ReactNode }
           </DialogDescription>
         </DialogHeader>
 
+        {/* Error Alert Box */}
+        {errorMessage && (
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200/90 text-red-700 text-xs flex items-start gap-2.5 my-1 animate-in fade-in">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-semibold text-red-900 leading-snug">{errorMessage}</p>
+              <p className="text-[11px] text-red-700/90">
+                No mock certificate was added. Please verify your badge URL/file and ensure it is valid and public.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Mode Selector */}
         <div className="flex gap-2 p-1 bg-zinc-100 rounded-xl mt-2">
           <button
             type="button"
-            onClick={() => setUploadMode("credly")}
+            onClick={() => {
+              setUploadMode("credly");
+              setErrorMessage(null);
+            }}
             className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
               uploadMode === "credly" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-900"
             }`}
@@ -158,7 +195,10 @@ export function CertificateUploader({ children }: { children?: React.ReactNode }
 
           <button
             type="button"
-            onClick={() => setUploadMode("file")}
+            onClick={() => {
+              setUploadMode("file");
+              setErrorMessage(null);
+            }}
             className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
               uploadMode === "file" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-900"
             }`}

@@ -32,7 +32,7 @@ export function UserMenu({ user, collapsed }: UserMenuProps) {
   const displayName =
     user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
   const email = user.email || "";
-  const avatarUrl = user.user_metadata?.avatar_url;
+  const avatarUrl = user.user_metadata?.avatar_url || "https://github.com/uselessdevloper.png";
 
   return (
     <DropdownMenu>

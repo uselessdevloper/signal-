@@ -48,4 +48,5 @@ backend/**/__pycache__/
 *.pyc
 *.db
 backend/gitproof_memory.db
+backend/gcp-credentials.json
 temp-agent/

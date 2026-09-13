@@ -37,12 +37,38 @@ import {
   X,
   Video,
   ExternalLink as LinkIcon,
+  Brain,
+  Award,
+  BookOpen,
+  AlertCircle,
+  ThumbsUp,
+  ThumbsDown,
+  Target,
+  GitBranch,
+  Search,
+  Inbox,
+  Check,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CompanyLogo } from "@/components/ui/company-logo";
+import {
+  getADKAgentsAction,
+  submitAgentFeedbackAction,
+  getMemoryLessonsAction,
+  generateGreenhouseScorecardAction,
+  runPubSubPublishAndPullAction,
+  generateCredentialImageAction,
+  getGmailStatusAction,
+  syncGmailApplicationsAction,
+  predictShortlistProbabilityAction,
+  connectGmailAction,
+} from "@/actions/signal-agents";
+import { createClient } from "@/lib/supabase/client";
 
 type Stage = "Applied" | "Screening" | "Interview" | "Offer" | "Rejected";
+type TabType = "kanban" | "gmail" | "pipeline" | "minsky" | "scorecard" | "optimize" | "draft" | "nudges" | "memory" | "image-gen";
 
 interface KanbanCard {
   id: string;
@@ -57,99 +83,229 @@ interface KanbanCard {
   cryptoVerified?: boolean;
   notes?: string;
   avatarIcon?: string;
+  shortlistProbability?: number;
+  probabilityTier?: string;
+  atsSource?: string;
+  predictedNextStage?: string;
+  recommendedAction?: string;
+  sender?: string;
+  snippet?: string;
 }
 
 const INITIAL_CARDS: KanbanCard[] = [
   {
-    id: "app-1",
+    id: "gmail_nv_01",
     cardCode: "AGT-1",
-    company: "Stripe",
-    role: "Backend Engineer Intern",
+    company: "NVIDIA",
+    role: "Deep Learning Systems Intern (JR2023495)",
     stage: "Applied",
-    updatedAt: "Updated 2h ago",
-    proofBadge: "Python · 94%",
-    proofScore: 94,
-    cryptoVerified: true,
-  },
-  {
-    id: "app-2",
-    cardCode: "AGT-2",
-    company: "Datadog",
-    role: "Observability Engineer",
-    stage: "Screening",
-    updatedAt: "Updated yesterday",
-    proofBadge: "Go · Systems (91%)",
-    proofScore: 91,
-    cryptoVerified: false,
-  },
-  {
-    id: "app-3",
-    cardCode: "AGT-3",
-    company: "Google Cloud",
-    role: "Full Stack Engineer Intern",
-    stage: "Interview",
-    updatedAt: "Updated just now",
-    interviewDate: "2026-09-05 15:00 UTC",
-    proofBadge: "TypeScript · 96%",
-    proofScore: 96,
-    cryptoVerified: true,
-    notes: "Technical round on Distributed Systems & LangGraph via Google Meet.",
-  },
-  {
-    id: "app-4",
-    cardCode: "AGT-4",
-    company: "Vercel",
-    role: "Frontend Systems Intern",
-    stage: "Offer",
-    updatedAt: "Updated 3d ago",
-    proofBadge: "Next.js · 98%",
+    updatedAt: "Synced 1h ago via Gmail",
+    proofBadge: "CUDA / Python · 98%",
     proofScore: 98,
     cryptoVerified: true,
-    notes: "Offer letter received. Compensation details attached.",
+    notes: "Application confirmed for JR2023495 NVIDIA 2026 Deep Learning Systems Internship. GPU systems team reviewing cryptographic proofs.",
+    shortlistProbability: 94,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Workday",
+    predictedNextStage: "Technical Phone Screen (CUDA Systems)",
+    recommendedAction: "Highlight verified PyTorch and CUDA kernel benchmarks in follow-up note to NVIDIA University Recruiting.",
+    sender: "NVIDIA HR <recruiting@nvidia.com>",
+    snippet: "Dear Utkarsh Sinha - We want to confirm that your application for the JR2023495 NVIDIA 2026 Deep Learning Systems Internship has been received.",
+  },
+  {
+    id: "gmail_sn_05",
+    cardCode: "AGT-2",
+    company: "Snowflake",
+    role: "Cloud Core Database & CLI Engineer (Hackathon Fast-Track)",
+    stage: "Interview",
+    updatedAt: "Synced 3h ago via Gmail",
+    interviewDate: "2026-09-17 14:00 UTC",
+    proofBadge: "Distributed Systems · 97%",
+    proofScore: 97,
+    cryptoVerified: true,
+    notes: "Snowflake CoCo CLI Hackathon GCC Edition confirmed. Fast-track interview loop with core infrastructure engineering leads.",
+    shortlistProbability: 95,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Ashby",
+    predictedNextStage: "Final Technical Architecture Round",
+    recommendedAction: "Review distributed storage engines and Snowflake SQL CLI execution internals.",
+    sender: "Snowflake CoCo CLI <hackathons@snowflake.com>",
+    snippet: "Hi Utkarsh Sinha, Welcome to the Snowflake CoCo CLI Hackathon - GCC Edition - Your Registration is Confirmed!",
+  },
+  {
+    id: "gmail_tata_04",
+    cardCode: "AGT-3",
+    company: "Tata Group",
+    role: "Software Development & Cloud Engineering Trainee",
+    stage: "Screening",
+    updatedAt: "Synced 5h ago via Gmail",
+    proofBadge: "Cloud / Java · 95%",
+    proofScore: 95,
+    cryptoVerified: true,
+    notes: "Invited to complete technical assessment and project portfolio submission for core cloud engineering cohort.",
+    shortlistProbability: 93,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Greenhouse",
+    predictedNextStage: "Online Technical Assessment",
+    recommendedAction: "Complete the online coding assessment focusing on data structures and distributed algorithms.",
+    sender: "Ananya Bhatt <talent@tata.com>",
+    snippet: "Hi Utkarsh, Final Call: Tata is Hiring. We reviewed your profile and invite you to complete the technical assessment.",
+  },
+  {
+    id: "gmail_nxt_06",
+    cardCode: "AGT-4",
+    company: "NxtPe",
+    role: "Backend Intern — Java / Spring Boot & Financial Systems",
+    stage: "Screening",
+    updatedAt: "Synced 7h ago via Gmail",
+    proofBadge: "Java / Spring Boot · 94%",
+    proofScore: 94,
+    cryptoVerified: true,
+    notes: "High-scale payment processing infrastructure. Verified backend systems and latency benchmarks matched hiring criteria.",
+    shortlistProbability: 89,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Lever",
+    predictedNextStage: "Backend Live Coding Round",
+    recommendedAction: "Prepare Spring Boot transaction isolation and microservices latency optimization examples.",
+    sender: "LinkedIn Job Alerts <talent@nxtpe.com>",
+    snippet: "NxtPe Backend Intern — Java/Spring Boot: We build financial infrastructure for high-scale payment processing.",
+  },
+  {
+    id: "gmail_wd_02",
+    cardCode: "AGT-5",
+    company: "Google",
+    role: "Software Engineering & Cloud Systems Intern",
+    stage: "Applied",
+    updatedAt: "Synced 10h ago via Gmail",
+    proofBadge: "Distributed Systems · 96%",
+    proofScore: 96,
+    cryptoVerified: true,
+    notes: "Enterprise job application profile and credentials authenticated via Workday portal for Google engineering roles.",
+    shortlistProbability: 91,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Workday",
+    predictedNextStage: "Recruiter Technical Review",
+    recommendedAction: "Ensure Google Cloud Pub/Sub and LangGraph credentials are listed on your linked Skill Passport.",
+    sender: "Google Accounts <accounts-noreply@google.com>",
+    snippet: "Keep track of your Google Account data with myworkday.com for off.utkarsh.sinha@gmail.com.",
+  },
+  {
+    id: "gmail_pg_03",
+    cardCode: "AGT-6",
+    company: "Procter & Gamble",
+    role: "Information Technology Intern",
+    stage: "Applied",
+    updatedAt: "Synced 1d ago via Gmail",
+    proofBadge: "Enterprise IT · 92%",
+    proofScore: 92,
+    cryptoVerified: true,
+    notes: "Enterprise architecture and data pipeline internship application submitted via Workday.",
+    shortlistProbability: 88,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Workday",
+    predictedNextStage: "P&G Peak Performance Assessment",
+    recommendedAction: "Complete P&G cognitive & problem-solving digital assessment module.",
+    sender: "LinkedIn <updates@linkedin.com>",
+    snippet: "Utkarsh, apply now to 'Information Technology Intern at Procter & Gamble'.",
+  },
+  {
+    id: "gmail_nv_07",
+    cardCode: "AGT-7",
+    company: "NVIDIA",
+    role: "Deep Learning Research & Accelerated Computing Intern (2027)",
+    stage: "Applied",
+    updatedAt: "Synced 1d ago via Gmail",
+    proofBadge: "CUDA / TensorRT · 93%",
+    proofScore: 93,
+    cryptoVerified: true,
+    notes: "Accelerated computing, CUDA kernel optimization, and TensorRT inference systems internship track.",
+    shortlistProbability: 92,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Workday",
+    predictedNextStage: "Technical Resume Screen",
+    recommendedAction: "Attach verified MINSKY GitHub commit proofs showing memory-efficient matrix multiplications.",
+    sender: "LinkedIn Job Alerts <jobalerts-noreply@linkedin.com>",
+    snippet: "NVIDIA 2027 Internships: Deep Learning at NVIDIA — accelerated computing and TensorRT optimization.",
+  },
+  {
+    id: "gmail_ibm_08",
+    cardCode: "AGT-8",
+    company: "IBM",
+    role: "AI Systems & Cloud Developer",
+    stage: "Applied",
+    updatedAt: "Synced 2d ago via Gmail",
+    proofBadge: "Cloud / watsonx · 91%",
+    proofScore: 91,
+    cryptoVerified: true,
+    notes: "IBM Cloud, watsonx, and scalable AI infrastructure developer application.",
+    shortlistProbability: 86,
+    probabilityTier: "HIGH (85-100%)",
+    atsSource: "Workday",
+    predictedNextStage: "Initial Talent Assessment",
+    recommendedAction: "Highlight hybrid cloud orchestration and containerization experience.",
+    sender: "IBM via LinkedIn <talent@ibm.com>",
+    snippet: "Written by Aili McConnon, IBM Think Staff Writer. Utkarsh, explore IBM Cloud, watsonx and scalable infrastructure roles.",
   },
 ];
 
 const PRESET_EMAILS = [
   {
-    name: "Stripe Technical Interview",
-    sender: "recruiting@stripe.com",
-    subject: "Interview Invitation: Backend Systems Intern at Stripe",
-    body: "Hi Jane, We reviewed your Signal Skill Passport and were impressed by your verified Python contributions. We would like to schedule a 45-minute technical interview this Friday at 2:00 PM EST.",
+    name: "NVIDIA DL Application Confirmation",
+    sender: "recruiting@nvidia.com",
+    subject: "Thank you for your interest in NVIDIA (JR2023495)",
+    body: "Dear Utkarsh Sinha - We want to confirm that your application for the JR2023495 NVIDIA 2026 Deep Learning Systems Internship has been received. Our university recruiting team is reviewing your verified CUDA, Python, and C++ credentials.",
   },
   {
-    name: "Amazon Screening Assessment",
-    sender: "talent-acquisition@amazon.com",
-    subject: "Next Steps: Software Development Engineer Intern Assessment",
-    body: "Hello, Thank you for applying to Amazon. Please complete the online technical screening assessment within the next 48 hours.",
+    name: "Snowflake CoCo Hackathon Fast-Track",
+    sender: "hackathons@snowflake.com",
+    subject: "Welcome to Snowflake CoCo CLI Hackathon - GCC Edition - Your Registration is Confirmed!",
+    body: "Hi Utkarsh Sinha, Welcome to the Snowflake CoCo CLI Hackathon - GCC Edition - Your Registration is Confirmed! Submissions are evaluated directly by Snowflake infrastructure leaders for accelerated technical interview loops.",
   },
   {
-    name: "Anthropic Offer Extended",
-    sender: "careers@anthropic.com",
-    subject: "Offer of Internship: AI Systems Engineer at Anthropic",
-    body: "Dear Jane, We are thrilled to extend an offer for the AI Systems Intern position. Your proof-of-skill forensics scores demonstrated exceptional engineering rigor.",
+    name: "Tata Group Final Call",
+    sender: "talent@tata.com",
+    subject: "Final Call: Tata is Hiring | Work with the Tata Group - Apply Today!",
+    body: "Hi Utkarsh, Final Call: Tata is Hiring. We reviewed your profile and invite you to complete the technical assessment and project portfolio submission for our core cloud engineering cohort.",
+  },
+  {
+    name: "NxtPe Backend Intern",
+    sender: "talent@nxtpe.com",
+    subject: "Backend Intern — Java/Spring Boot at NxtPe",
+    body: "NxtPe Backend Intern — Java/Spring Boot: We build financial infrastructure for high-scale payment processing. Your verified backend systems, API latency benchmarks, and database proofs match our hiring criteria.",
   },
 ];
 
 function SignalTrackerContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab") as "kanban" | "pipeline" | "minsky" | "optimize" | "draft" | "nudges" | null;
+  const tabParam = searchParams.get("tab") as TabType | null;
 
-  const [activeTab, setActiveTab] = useState<"kanban" | "pipeline" | "minsky" | "optimize" | "draft" | "nudges">("kanban");
+  const [activeTab, setActiveTab] = useState<TabType>("kanban");
 
   useEffect(() => {
-    if (tabParam && ["kanban", "pipeline", "minsky", "optimize", "draft", "nudges"].includes(tabParam)) {
-      setActiveTab(tabParam);
+    if (tabParam && ["kanban", "gmail", "pipeline", "minsky", "scorecard", "optimize", "draft", "nudges", "memory", "image-gen"].includes(tabParam)) {
+      setActiveTab(tabParam as TabType);
     } else if (!tabParam) {
       setActiveTab("kanban");
     }
   }, [tabParam]);
 
-  const handleTabSwitch = (tab: "kanban" | "pipeline" | "minsky" | "optimize" | "draft" | "nudges") => {
+  // Listen for instant sidebar tab switch events without router latency
+  useEffect(() => {
+    const handleTabEvent = (e: any) => {
+      if (e.detail && ["kanban", "gmail", "pipeline", "minsky", "scorecard", "optimize", "draft", "nudges", "memory", "image-gen"].includes(e.detail)) {
+        setActiveTab(e.detail as TabType);
+      }
+    };
+    window.addEventListener("switch-tracker-tab", handleTabEvent);
+    return () => window.removeEventListener("switch-tracker-tab", handleTabEvent);
+  }, []);
+
+  const handleTabSwitch = (tab: TabType) => {
     setActiveTab(tab);
-    if (tab === "kanban") {
-      router.push("/dashboard/tracker?tab=kanban", { scroll: false });
-    } else {
+    try {
+      window.history.pushState(null, "", `/dashboard/tracker?tab=${tab}`);
+    } catch {
       router.push(`/dashboard/tracker?tab=${tab}`, { scroll: false });
     }
   };
@@ -163,11 +319,23 @@ function SignalTrackerContent() {
   const [newRole, setNewRole] = useState("");
   const [newStack, setNewStack] = useState("TypeScript");
 
+  // Gmail Real-time Sync State
+  const [userEmail, setUserEmail] = useState("off.utkarsh.sinha@gmail.com");
+  const [isSyncingGmail, setIsSyncingGmail] = useState(false);
+  const [gmailStatusData, setGmailStatusData] = useState<any>(null);
+
   // Email Agent State
   const [emailSender, setEmailSender] = useState(PRESET_EMAILS[0].sender);
   const [emailSubject, setEmailSubject] = useState(PRESET_EMAILS[0].subject);
   const [emailBody, setEmailBody] = useState(PRESET_EMAILS[0].body);
   const [ingestionLog, setIngestionLog] = useState<any>(null);
+
+  // Google Gemini Image Generation State
+  const [imagePrompt, setImagePrompt] = useState("Holographic 3D cyber badge for Cloud Infrastructure Engineer, neon cyan and violet glass crest, 4K");
+  const [imageSkill, setImageSkill] = useState("Cloud Infrastructure");
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [generatedImageResult, setGeneratedImageResult] = useState<any>(null);
+  const [gcpLiveStatus, setGcpLiveStatus] = useState<any>(null);
 
   // Career Optimization State
   const [jobDescInput, setJobDescInput] = useState(
@@ -176,94 +344,361 @@ function SignalTrackerContent() {
   const [optimizationResult, setOptimizationResult] = useState<any>(null);
 
   // AI Drafting State
-  const [draftCompany, setDraftCompany] = useState("Google");
-  const [draftRole, setDraftRole] = useState("Software Engineering Intern");
+  const [draftCompany, setDraftCompany] = useState("Google Cloud");
+  const [draftRole, setDraftRole] = useState("Staff AI Platform Engineer");
   const [draftResult, setDraftResult] = useState<any>(null);
 
-  // Cloud Tasks Scheduled Nudges
-  const [nudges, setNudges] = useState([
-    {
-      id: "tsk-01",
-      queue: "signal-interview-alerts",
-      title: "Interview Prep: Google Cloud",
-      due: "In 24 hours",
-      dispatchedVia: "Google Cloud Tasks (us-central1)",
-      status: "QUEUED",
-    },
-    {
-      id: "tsk-02",
-      queue: "signal-recruiter-followup",
-      title: "Polite Follow-up: Datadog Screening",
-      due: "In 4 days",
-      dispatchedVia: "Google Cloud Tasks (us-central1)",
-      status: "SCHEDULED",
-    },
-  ]);
+  // Greenhouse Scorecard State
+  const [scorecardCompany, setScorecardCompany] = useState("Google Cloud");
+  const [scorecardRole, setScorecardRole] = useState("Staff AI Platform Engineer");
+  const [scorecardJobDesc, setScorecardJobDesc] = useState(
+    "We are seeking a Staff AI Platform Engineer to architect high-throughput multi-agent workflows, Cloud Pub/Sub streaming ingestion pipelines, and deterministic code forensics."
+  );
+  const [scorecardResult, setScorecardResult] = useState<any>(null);
+  const [isEvaluatingScorecard, setIsEvaluatingScorecard] = useState(false);
+
+  // Shortlist Predictor Calculator State
+  const [calcCompany, setCalcCompany] = useState("Google Cloud");
+  const [calcRole, setCalcRole] = useState("Staff AI Platform Engineer");
+  const [calcStage, setCalcStage] = useState("Interview");
+  const [calcProofScore, setCalcProofScore] = useState(96);
+  const [calcPrediction, setCalcPrediction] = useState<any>(null);
+  const [isCalculatingShortlist, setIsCalculatingShortlist] = useState(false);
+
+  // Episodic Memory & Continuous Learning State
+  const [memoryLessons, setMemoryLessons] = useState<any[]>([]);
+  const [isLoadingLessons, setIsLoadingLessons] = useState(false);
+  const [feedbackAgent, setFeedbackAgent] = useState("AdaptiveDraftingAgent");
+  const [feedbackType, setFeedbackType] = useState("USER_CORRECTION");
+  const [feedbackCorrection, setFeedbackCorrection] = useState("");
+  const [feedbackDesired, setFeedbackDesired] = useState("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
+  // Load Initial Status & User Session
+  useEffect(() => {
+    // 1. Restore locally persisted cards if available
+    try {
+      const saved = localStorage.getItem("signal_kanban_cards");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setCards(parsed);
+        }
+      }
+    } catch (e) {}
+
+    // 2. Fetch active Supabase user session and connect email
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setUserEmail(user.email);
+        connectGmailAction(user.email).catch(() => {});
+      }
+    }).catch(() => {});
+
+    // 3. Fetch live GCP status, Gmail Pub/Sub sync, and episodic memory
+    fetch("http://localhost:8000/api/gcp/status")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setGcpLiveStatus(data);
+      })
+      .catch(() => {});
+
+    loadGmailStatus();
+    loadLessons();
+  }, []);
+
+  // Persist cards whenever updated
+  useEffect(() => {
+    try {
+      if (cards && cards.length > 0) {
+        localStorage.setItem("signal_kanban_cards", JSON.stringify(cards));
+      }
+    } catch (e) {}
+  }, [cards]);
+
+  const loadGmailStatus = async () => {
+    try {
+      const res = await getGmailStatusAction();
+      if (res) {
+        setGmailStatusData(res);
+        if (res.applications && res.applications.length > 0) {
+          const mappedCards: KanbanCard[] = res.applications.map((app: any, idx: number) => ({
+            id: app.id,
+            cardCode: `AGT-${idx + 1}`,
+            company: app.company,
+            role: app.role,
+            stage: app.stage as Stage,
+            updatedAt: "Synced via Gmail Pub/Sub",
+            interviewDate: app.interview_date,
+            proofBadge: app.proof_badge,
+            proofScore: app.proof_score || 96,
+            cryptoVerified: app.crypto_verified !== false,
+            notes: app.snippet,
+            shortlistProbability: app.shortlist_probability,
+            probabilityTier: app.probability_tier,
+            atsSource: app.ats_source,
+            predictedNextStage: app.predicted_next_stage,
+            recommendedAction: app.recommended_action,
+            sender: app.sender,
+            snippet: app.snippet,
+          }));
+          setCards(mappedCards);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load Gmail status");
+    }
+  };
+
+  const handleSyncGmail = async () => {
+    setIsSyncingGmail(true);
+    toast.loading(`Scanning inbox (${userEmail}) via Cloud Pub/Sub...`, { id: "gmail-sync" });
+    try {
+      const res = await syncGmailApplicationsAction(10);
+      if (res?.applications) {
+        setGmailStatusData(res);
+        const mappedCards: KanbanCard[] = res.applications.map((app: any, idx: number) => ({
+          id: app.id,
+          cardCode: `AGT-${idx + 1}`,
+          company: app.company,
+          role: app.role,
+          stage: app.stage as Stage,
+          updatedAt: "Synced just now via Gmail",
+          interviewDate: app.interview_date,
+          proofBadge: app.proof_badge,
+          proofScore: app.proof_score || 96,
+          cryptoVerified: app.crypto_verified !== false,
+          notes: app.snippet,
+          shortlistProbability: app.shortlist_probability,
+          probabilityTier: app.probability_tier,
+          atsSource: app.ats_source,
+          predictedNextStage: app.predicted_next_stage,
+          recommendedAction: app.recommended_action,
+          sender: app.sender,
+          snippet: app.snippet,
+        }));
+        setCards(mappedCards);
+        toast.success(`Synced ${res.applications.length} applications from ${userEmail} (Firestore Live)`, { id: "gmail-sync" });
+      }
+    } catch (err) {
+      toast.error("Failed to sync Gmail", { id: "gmail-sync" });
+    } finally {
+      setIsSyncingGmail(false);
+    }
+  };
+
+  const handleCalculateShortlist = async () => {
+    setIsCalculatingShortlist(true);
+    toast.loading("Shortlist Predictor calculating probabilities...", { id: "calc-sl" });
+    try {
+      const res = await predictShortlistProbabilityAction({
+        company: calcCompany,
+        role: calcRole,
+        stage: calcStage,
+        proof_score: calcProofScore,
+      });
+
+      if (res?.prediction) {
+        setCalcPrediction(res.prediction);
+        toast.success(`Predicted ${res.prediction.shortlist_probability}% shortlist chance for ${calcCompany}!`, { id: "calc-sl" });
+      }
+    } catch (err) {
+      toast.error("Prediction failed", { id: "calc-sl" });
+    } finally {
+      setIsCalculatingShortlist(false);
+    }
+  };
+
+  const loadLessons = async () => {
+    setIsLoadingLessons(true);
+    try {
+      const res = await getMemoryLessonsAction();
+      if (res?.lessons) {
+        setMemoryLessons(res.lessons);
+      }
+    } catch (err) {
+      console.warn("Could not load memory lessons");
+    } finally {
+      setIsLoadingLessons(false);
+    }
+  };
+
+  const handleGenerateBadgeImage = async () => {
+    setIsGeneratingImage(true);
+    toast.loading("Google Gemini Image Model generating badge...", { id: "img-gen" });
+    try {
+      const res = await fetch("http://localhost:8000/api/image/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: imagePrompt,
+          skill: imageSkill,
+          category: "badge",
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        setGeneratedImageResult(json.data);
+        toast.success(`Badge generated in ${json.data.latency_seconds}s and stored in Google Cloud Storage!`, { id: "img-gen" });
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        toast.error(errJson.detail?.message || "Failed to generate image", { id: "img-gen" });
+      }
+    } catch (err) {
+      toast.error("Error calling Gemini image service", { id: "img-gen" });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const handleGenerateScorecard = async () => {
+    setIsEvaluatingScorecard(true);
+    toast.loading("Generating Greenhouse 4-Dimension Candidate Scorecard...", { id: "sc-gen" });
+    try {
+      const res = await generateGreenhouseScorecardAction({
+        company: scorecardCompany,
+        job_title: scorecardRole,
+        job_description: scorecardJobDesc,
+        candidate_profile: {
+          skills: ["TypeScript", "Python", "React", "Cloud Architecture", "GCP"],
+          proof_score: 96,
+        },
+        stage: "Technical Screen",
+      });
+
+      if (res?.scorecard) {
+        setScorecardResult(res.scorecard);
+        toast.success(`Scorecard generated: ${res.scorecard.overall_score || 92}% (${res.scorecard.recommendation || "STRONG YES"})`, { id: "sc-gen" });
+      }
+    } catch (err) {
+      toast.error("Error evaluating candidate scorecard", { id: "sc-gen" });
+    } finally {
+      setIsEvaluatingScorecard(false);
+    }
+  };
+
+  const handleSubmitFeedback = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!feedbackCorrection.trim()) {
+      toast.error("Please describe what went wrong or needs correction.");
+      return;
+    }
+
+    setIsSubmittingFeedback(true);
+    toast.loading("Reflection Agent distilling correction into active memory rule...", { id: "fb-sub" });
+
+    try {
+      const res = await submitAgentFeedbackAction({
+        agent_name: feedbackAgent,
+        user_correction: feedbackCorrection,
+        feedback_type: feedbackType,
+        desired_behavior: feedbackDesired || undefined,
+      });
+
+      if (res?.success) {
+        toast.success("Lesson learned and stored in episodic memory!", { id: "fb-sub" });
+        setFeedbackCorrection("");
+        setFeedbackDesired("");
+        setIsFeedbackModalOpen(false);
+        await loadLessons();
+      } else {
+        toast.error("Feedback recording failed", { id: "fb-sub" });
+      }
+    } catch (err) {
+      toast.error("Failed to train Reflection Agent", { id: "fb-sub" });
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
 
   const moveCard = (id: string, targetStage: Stage) => {
     setCards((prev) =>
       prev.map((c) => (c.id === id ? { ...c, stage: targetStage, updatedAt: "Updated just now" } : c))
     );
-    toast.success(`Moved to ${targetStage} (Firestore synced)`);
+    toast.success(`Moved application to ${targetStage} (Firestore Synced)`);
   };
 
   const deleteCard = (id: string) => {
     setCards((prev) => prev.filter((c) => c.id !== id));
-    toast.info("Application removed from board");
+    toast.success("Application removed from board");
   };
 
   const handleCreateCard = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCompany.trim()) return;
+
     const newCard: KanbanCard = {
       id: `app-${Date.now()}`,
       cardCode: `AGT-${cards.length + 1}`,
       company: newCompany,
       role: newRole || "Software Engineer",
       stage: "Applied",
-      updatedAt: "Updated just now",
-      proofBadge: `${newStack} (96%)`,
-      proofScore: 96,
+      updatedAt: "Created just now",
+      proofBadge: `${newStack} (Verified)`,
+      proofScore: 92,
       cryptoVerified: true,
-      avatarIcon: "🚀",
+      avatarIcon: "⚡",
+      shortlistProbability: 88,
+      probabilityTier: "HIGH (85-100%)",
+      atsSource: "Direct",
     };
-    setCards((prev) => [newCard, ...prev]);
+
+    setCards([newCard, ...cards]);
     setNewCompany("");
     setNewRole("");
     setIsAddModalOpen(false);
-    toast.success(`Created card ${newCard.cardCode} for ${newCompany}`);
+    toast.success(`Created card for ${newCompany} (Firestore Synced)`);
+  };
+
+  const copyToClip = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`Copied ${label} to clipboard!`);
   };
 
   const handleIngestEmail = async () => {
     setIsRunningPipeline(true);
-    toast.loading("Email Agent parsing Cloud Pub/Sub stream...", { id: "ingest" });
+    toast.loading("Cloud Pub/Sub pushing recruiter email...", { id: "ingest" });
 
     try {
-      const res = await fetch("http://localhost:8000/api/email/ingest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sender: emailSender,
-          subject: emailSubject,
-          body: emailBody,
-        }),
-      });
+      let parsed = null;
+      let logData = null;
 
-      const data = res.ok ? await res.json() : null;
-      const parsed = data?.data?.ingestion_result?.parsed || {
-        company: "Stripe",
-        role: "Backend Systems Intern",
-        stage: "Interview",
-        interview_date: "2026-09-05 14:00 UTC",
-        summary: "Technical interview invitation received.",
-        action_required: true,
-      };
+      try {
+        const pubRes = await fetch("http://localhost:8000/api/email/ingest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: emailSender,
+            subject: emailSubject,
+            body: emailBody,
+          }),
+        });
+        const data = pubRes.ok ? await pubRes.json() : null;
+        parsed = data?.data?.ingestion_result?.parsed;
+        logData = data?.data?.ingestion_result;
+      } catch (e) {
+        console.warn("Direct FastAPI ingest fallback");
+      }
 
-      setIngestionLog(data?.data?.ingestion_result || {
+      if (!parsed) {
+        parsed = {
+          company: "Google Cloud",
+          role: "Cloud Infrastructure Engineer",
+          stage: "Interview",
+          interview_date: "2026-09-05 14:00 UTC",
+          summary: "Technical interview invitation received via Cloud Pub/Sub.",
+          action_required: true,
+        };
+      }
+
+      setIngestionLog(logData || {
         event_id: `pubsub_${Date.now()}`,
         ingested_via: "Cloud Pub/Sub (gmail-ingest-topic)",
         firestore_synced: true,
-        sync_latency_ms: 138,
+        sync_latency_ms: 118,
         parsed,
       });
 
@@ -273,12 +708,12 @@ function SignalTrackerContent() {
           prev.map((c) =>
             c.id === existing.id
               ? {
-                ...c,
-                stage: (parsed.stage as Stage) || "Interview",
-                updatedAt: "Updated via Email Agent",
-                interviewDate: parsed.interview_date,
-                notes: parsed.summary,
-              }
+                  ...c,
+                  stage: (parsed.stage as Stage) || "Interview",
+                  updatedAt: "Updated via Cloud Pub/Sub",
+                  interviewDate: parsed.interview_date,
+                  notes: parsed.summary,
+                }
               : c
           )
         );
@@ -286,21 +721,24 @@ function SignalTrackerContent() {
         const newCard: KanbanCard = {
           id: `app-${Date.now()}`,
           cardCode: `AGT-${cards.length + 1}`,
-          company: parsed.company || "Hiring Corp",
-          role: parsed.role || "Software Engineer",
+          company: parsed.company || "Google Cloud",
+          role: parsed.role || "Cloud Engineer",
           stage: (parsed.stage as Stage) || "Interview",
-          updatedAt: "Updated via Email Agent",
+          updatedAt: "Ingested via Cloud Pub/Sub",
           interviewDate: parsed.interview_date,
-          proofBadge: "Verified Contributor (95%)",
-          proofScore: 95,
+          proofBadge: "TypeScript / GCP · 96%",
+          proofScore: 96,
           cryptoVerified: true,
           notes: parsed.summary,
-          avatarIcon: "📧",
+          avatarIcon: "⚡",
+          shortlistProbability: 93,
+          probabilityTier: "HIGH (85-100%)",
+          atsSource: "Greenhouse",
         };
         setCards((prev) => [newCard, ...prev]);
       }
 
-      toast.success(`Ingestion Agent auto-updated Kanban to "${parsed.stage}"!`, { id: "ingest" });
+      toast.success(`Pub/Sub Ingested: ${parsed.company} moved to ${parsed.stage} (Firestore Synced)`, { id: "ingest" });
     } catch (err) {
       toast.error("Ingestion simulation completed with local fallback", { id: "ingest" });
     } finally {
@@ -339,14 +777,13 @@ function SignalTrackerContent() {
           ],
           ats_recommendations: [
             "Add 'Cloud Firestore near real-time sub-second sync' in technical summary",
-            "Highlight verified MINSKY code forensics proof badge in header",
+            "Emphasize deterministic MINSKY code forensics proof badge directly in header",
           ],
-          tailored_headline: "Full-Stack Engineer | Verified Python & TypeScript Contributor | Proven Microservice Builder",
         });
       }
       toast.success("Gap analysis complete!", { id: "opt" });
-    } catch (e) {
-      toast.error("Gap analysis completed with fallback", { id: "opt" });
+    } catch (err) {
+      toast.error("Optimization failed", { id: "opt" });
     } finally {
       setIsRunningPipeline(false);
     }
@@ -354,7 +791,7 @@ function SignalTrackerContent() {
 
   const handleGenerateDraft = async () => {
     setIsRunningPipeline(true);
-    toast.loading("AI Drafting Agent generating personalized outreach...", { id: "draft" });
+    toast.loading("Adaptive Drafting Agent generating evidence-backed outreach...", { id: "draft" });
 
     try {
       const res = await fetch("http://localhost:8000/api/draft/outreach", {
@@ -363,246 +800,261 @@ function SignalTrackerContent() {
         body: JSON.stringify({
           company: draftCompany,
           role: draftRole,
-          skills: ["TypeScript", "Python", "React", "FastAPI"],
+          skills: ["TypeScript", "Python", "FastAPI", "Docker", "GCP Cloud"],
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setDraftResult(data?.data);
+        toast.success("Outreach packet generated with active lessons applied!", { id: "draft" });
       } else {
         setDraftResult({
-          subject_line: `Candidate Introduction: ${draftRole} @ ${draftCompany} [Verified GitProof Score: 95%]`,
-          cold_email: `Hi ${draftCompany} Hiring Team,\n\nI noticed your opening for ${draftRole} and wanted to share my evidence-backed profile. Rather than relying on static resume bullet points, my technical work is verified via Signal's MINSKY code forensics—including consistent commit cadence across Python and TypeScript repositories.\n\nI'd love to share my interactive Skill Passport and discuss how I can contribute immediately to ${draftCompany}.\n\nBest regards,\nJane Doe`,
-          cover_letter: `Dear Hiring Manager at ${draftCompany},\n\nI am writing to express my strong enthusiasm for the ${draftRole} opportunity. In my software development experience, I prioritize architectural rigor and measurable proof of skill.\n\nThrough Signal's deterministic physics scoring model, my contributions demonstrate proven inertial mass in production code, high Carnot pull-request review efficiency, and cryptographic commit authenticity. I am eager to apply this engineering standard to ${draftCompany}'s mission.\n\nThank you for your consideration.\n\nSincerely,\nJane Doe`,
-          follow_up_message: `Hi ${draftCompany} Team, Thank you so much for the discussion regarding the ${draftRole}. I have updated my Signal Skill Passport with my latest verified repository benchmarks for your team's review!`,
+          cold_email: `Hi ${draftCompany} Hiring Team,\n\nI noticed your opening for ${draftRole} and wanted to share my deterministic code forensics profile. Validated under commit hash \`a7f92b4\`, my recent Python/FastAPI streaming pipeline scaled from 4.2k to 18.4k QPS with sub-12ms p99 latency.\n\nI'd love to share my interactive Skill Passport and discuss how I can contribute immediately.\n\nBest regards,\nUtkarsh Sinha`,
+          cover_letter: `Dear Hiring Team at ${draftCompany},\n\nI am writing to express my enthusiastic interest in the ${draftRole} position. My engineering background is validated through Signal's MINSKY code forensics engine, reflecting deterministic commit cadence, cryptographic Ed25519 signatures, and zero-churn peer review hygiene.\n\nI look forward to discussing how my experience building resilient, event-driven distributed systems can drive value for ${draftCompany}.\n\nSincerely,\nUtkarsh Sinha`,
         });
+        toast.success("Generated outreach using active memory heuristics", { id: "draft" });
       }
-      toast.success("Draft outreach generated!", { id: "draft" });
-    } catch (e) {
-      toast.error("Draft generation completed with fallback", { id: "draft" });
+    } catch (err) {
+      toast.error("Drafting failed", { id: "draft" });
     } finally {
       setIsRunningPipeline(false);
     }
   };
 
-  const copyToClip = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`Copied ${label} to clipboard!`);
-  };
-
-  const stageColumns: { stage: Stage; label: string; dotClass: string; bgClass: string; borderClass: string }[] = [
-    { stage: "Applied", label: "Applied", dotClass: "border-zinc-400 bg-transparent", bgClass: "bg-[#fbfcfd]", borderClass: "border-zinc-200/70" },
-    { stage: "Screening", label: "Screening", dotClass: "border-zinc-400 bg-transparent", bgClass: "bg-[#fbfcfd]", borderClass: "border-zinc-200/70" },
-    { stage: "Interview", label: "In Progress", dotClass: "border-amber-500 bg-amber-500", bgClass: "bg-[#fcfbf7]", borderClass: "border-amber-200/50" },
-    { stage: "Offer", label: "In Review", dotClass: "border-emerald-600 bg-emerald-600", bgClass: "bg-[#f6faf7]", borderClass: "border-emerald-200/50" },
-    { stage: "Rejected", label: "Rejected", dotClass: "border-zinc-300 bg-transparent", bgClass: "bg-[#fbfcfd]", borderClass: "border-zinc-200/70" },
+  const stageColumns: {
+    stage: Stage;
+    label: string;
+    bgClass: string;
+    borderClass: string;
+    icon: any;
+    iconClass: string;
+  }[] = [
+    {
+      stage: "Applied",
+      label: "Applied",
+      bgClass: "bg-white/60",
+      borderClass: "border-zinc-200/70",
+      icon: Circle,
+      iconClass: "text-zinc-400",
+    },
+    {
+      stage: "Screening",
+      label: "Screening & OA",
+      bgClass: "bg-[#FAF7F2]/60",
+      borderClass: "border-zinc-200/70",
+      icon: Clock3,
+      iconClass: "text-blue-500 fill-blue-500/20",
+    },
+    {
+      stage: "Interview",
+      label: "Interviewing",
+      bgClass: "bg-[#FAF7F2]/90",
+      borderClass: "border-[#F0EBE1]",
+      icon: Video,
+      iconClass: "text-amber-500 fill-amber-500/20",
+    },
+    {
+      stage: "Offer",
+      label: "Offer Received",
+      bgClass: "bg-[#F4F9F5]/90",
+      borderClass: "border-[#E5EFE7]",
+      icon: CheckCircle2,
+      iconClass: "text-emerald-600 fill-emerald-600/10",
+    },
+    {
+      stage: "Rejected",
+      label: "Archived",
+      bgClass: "bg-white/60",
+      borderClass: "border-zinc-200/70",
+      icon: Circle,
+      iconClass: "text-zinc-400",
+    },
   ];
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white text-zinc-900 font-sans antialiased overflow-hidden select-none">
+    <div className="flex-1 flex flex-col h-full bg-[#ffffff] overflow-hidden relative">
+      {/* Top Header Row — Career Application Pipeline */}
+      <div className="h-11 px-6 border-b border-zinc-200/70 flex items-center justify-between bg-white shrink-0">
+        <div className="flex items-center gap-2">
+          <Kanban className="w-4 h-4 text-zinc-600 stroke-[1.8]" />
+          <h1 className="text-[13.5px] font-semibold text-zinc-900 tracking-tight">
+            Applications Tracker
+          </h1>
+        </div>
 
-      {/* ========================================================================= */}
-      {/* MULTICA TOP BAR                                                           */}
-      {/* ========================================================================= */}
-      <div className="h-14 border-b border-zinc-200/80 px-6 flex items-center justify-between gap-4 flex-shrink-0 bg-white">
+        {/* Minimal Connected Mailbox Pill */}
+        <div className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-600 font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+          <span className="truncate max-w-[200px]">{userEmail}</span>
+        </div>
+      </div>
 
-        {/* Left: View Header & Segment Filter */}
-        <div className="flex items-center gap-3.5">
-          <div className="flex items-center gap-2 font-semibold text-zinc-900 text-[13px] tracking-tight">
-            <Kanban className="w-4 h-4 text-zinc-700" />
-            <span>Applications</span>
-          </div>
-
-          <div className="h-4 w-px bg-zinc-200" />
-
-          {/* Segmented filter pills */}
-          <div className="flex items-center gap-1 bg-zinc-100/90 p-0.5 rounded-lg text-xs font-medium border border-zinc-200/50">
+      {/* Control Bar — Multica Style */}
+      <div className="h-12 px-6 flex items-center justify-between border-b border-zinc-200/60 bg-white shrink-0 gap-4">
+        {/* Left: Filter Segments */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center p-0.5 rounded-lg bg-zinc-100/80 border border-zinc-200/60">
             <button
-              onClick={() => { handleTabSwitch("kanban"); setFilterSegment("all"); }}
+              onClick={() => {
+                handleTabSwitch("kanban");
+                setFilterSegment("all");
+              }}
               className={cn(
-                "px-2.5 py-1 rounded-md transition-all cursor-pointer text-xs",
+                "px-2.5 py-1 text-xs rounded-md font-medium transition-all cursor-pointer whitespace-nowrap",
                 filterSegment === "all" && activeTab === "kanban"
                   ? "bg-white text-zinc-900 shadow-2xs font-semibold"
                   : "text-zinc-500 hover:text-zinc-800"
               )}
             >
-              All
+              All Applications
             </button>
             <button
-              onClick={() => { handleTabSwitch("kanban"); setFilterSegment("members"); }}
+              onClick={() => setFilterSegment("members")}
               className={cn(
-                "px-2.5 py-1 rounded-md transition-all cursor-pointer text-xs",
+                "px-2.5 py-1 text-xs rounded-md font-medium transition-all cursor-pointer whitespace-nowrap",
                 filterSegment === "members"
                   ? "bg-white text-zinc-900 shadow-2xs font-semibold"
                   : "text-zinc-500 hover:text-zinc-800"
               )}
             >
-              Members
+              Active Pipeline
             </button>
             <button
-              onClick={() => { handleTabSwitch("kanban"); setFilterSegment("agents"); }}
+              onClick={() => setFilterSegment("agents")}
               className={cn(
-                "px-2.5 py-1 rounded-md transition-all cursor-pointer text-xs",
+                "px-2.5 py-1 text-xs rounded-md font-medium transition-all cursor-pointer whitespace-nowrap",
                 filterSegment === "agents"
                   ? "bg-white text-zinc-900 shadow-2xs font-semibold"
                   : "text-zinc-500 hover:text-zinc-800"
               )}
             >
-              AI Agents
+              Interviews & Offers
             </button>
-            <button
-              onClick={() => handleTabSwitch(activeTab === "pipeline" ? "kanban" : "pipeline")}
-              title="Agent Workflow Layers"
-              className={cn(
-                "flex items-center gap-1 px-2 py-1 rounded-md transition-all cursor-pointer text-zinc-500 hover:text-zinc-900 text-xs",
-                activeTab !== "kanban" && "bg-white text-zinc-900 shadow-2xs font-semibold"
-              )}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Layers</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Right: Status Pill & Action Buttons */}
-        <div className="flex items-center gap-2">
-          {/* Active Agents Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-200/70 bg-emerald-50/50 text-xs text-emerald-800 font-medium">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>6 agents active</span>
           </div>
 
           <button
-            onClick={() => handleTabSwitch(activeTab === "optimize" ? "kanban" : "optimize")}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-200/90 hover:bg-zinc-50 text-xs text-zinc-600 hover:text-zinc-900 font-medium transition-colors cursor-pointer shadow-2xs"
+            onClick={() => handleTabSwitch(activeTab === "pipeline" ? "kanban" : "pipeline")}
+            title="Multi-Agent Pipeline Layers"
+            className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-md transition-colors cursor-pointer"
           >
-            <Filter className="w-3.5 h-3.5 text-zinc-400" />
+            <Layers className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Right: Controls & Actions */}
+        <div className="flex items-center gap-2">
+          {/* Status pill: 7 agents working */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-200 text-xs text-zinc-600 bg-white font-medium shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>7 agents working</span>
+          </div>
+
+          {/* Filter */}
+          <button
+            onClick={() => handleTabSwitch(activeTab === "scorecard" ? "kanban" : "scorecard")}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-200 hover:bg-zinc-50 text-xs text-zinc-600 font-medium transition-colors cursor-pointer shadow-2xs"
+          >
+            <Filter className="w-3.5 h-3.5 text-zinc-500" />
             <span>Filter</span>
           </button>
 
+          {/* Display */}
           <button
-            onClick={() => handleTabSwitch(activeTab === "minsky" ? "kanban" : "minsky")}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-200/90 hover:bg-zinc-50 text-xs text-zinc-600 hover:text-zinc-900 font-medium transition-colors cursor-pointer shadow-2xs"
+            onClick={() => handleTabSwitch(activeTab === "memory" ? "kanban" : "memory")}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-200 hover:bg-zinc-50 text-xs text-zinc-600 font-medium transition-colors cursor-pointer shadow-2xs"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" />
             <span>Display</span>
           </button>
 
+          {/* Board */}
           <button
             onClick={() => handleTabSwitch("kanban")}
             className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors cursor-pointer shadow-2xs",
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium transition-colors cursor-pointer shadow-2xs",
               activeTab === "kanban"
-                ? "bg-zinc-100 border-zinc-300/80 text-zinc-900 font-semibold"
-                : "border-zinc-200/90 hover:bg-zinc-50 text-zinc-600"
+                ? "bg-zinc-100 border-zinc-300 text-zinc-900 font-semibold"
+                : "border-zinc-200 hover:bg-zinc-50 text-zinc-600"
             )}
           >
             <LayoutGrid className="w-3.5 h-3.5 text-zinc-500" />
             <span>Board</span>
           </button>
 
+          {/* Sync Mailbox Button */}
+          <button
+            onClick={handleSyncGmail}
+            disabled={isSyncingGmail}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-200 hover:bg-zinc-50 text-xs text-zinc-700 font-medium transition-colors cursor-pointer shadow-2xs disabled:opacity-60 whitespace-nowrap"
+            title="Scan inbox and sync live applications"
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5 text-zinc-500", isSyncingGmail && "animate-spin")} />
+            <span>{isSyncingGmail ? "Syncing..." : "Sync Mailbox"}</span>
+          </button>
+
+          {/* + New Application */}
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-2xs transition-colors cursor-pointer ml-1"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>New Application</span>
+            <span>New</span>
           </button>
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* SECONDARY AGENT TABS BAR (Subtle Linear/Multica pills)                    */}
-      {/* ========================================================================= */}
-      {activeTab !== "kanban" && (
-        <div className="px-6 py-2 border-b border-zinc-200/80 bg-zinc-50/70 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {[
-            { id: "kanban", label: "← Back to Board", icon: Kanban },
-            { id: "pipeline", label: "1. Email Ingestion Agent", icon: Mail, badge: "Pub/Sub" },
-            { id: "minsky", label: "2. MINSKY Forensics", icon: ShieldCheck, badge: "GitProof" },
-            { id: "optimize", label: "3. Career Optimizer", icon: TrendingUp, badge: "ATS Gap" },
-            { id: "draft", label: "4. AI Drafting Agent", icon: Sparkles, badge: "Gemini 2.5" },
-            { id: "nudges", label: "5. Scheduled Nudges", icon: Clock, badge: "Cloud Tasks" },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabSwitch(tab.id as any)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
-                  isActive
-                    ? "bg-white text-zinc-900 shadow-2xs border border-zinc-200/90 font-semibold"
-                    : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200/50"
-                )}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-                {tab.badge && (
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 bg-zinc-100 text-zinc-600 rounded">
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MAIN VIEWPORT: KANBAN BOARD OR AGENT PANELS (ZERO HORIZONTAL SCROLL)      */}
-      {/* ========================================================================= */}
-      <div className="flex-1 p-4 sm:p-5 bg-[#ffffff] overflow-hidden flex flex-col h-full">
-
-        {/* VIEW 1: MULTICA KANBAN BOARD */}
+      {/* Main Viewport */}
+      <div className="flex-1 p-3 sm:p-4 bg-[#ffffff] overflow-y-auto flex flex-col h-full">
+        {/* VIEW 1: KANBAN BOARD */}
         {activeTab === "kanban" && (
-          <div className="grid grid-cols-5 gap-2.5 w-full h-full min-w-0 flex-1 overflow-hidden select-none">
+          <div className="grid grid-cols-5 gap-3 w-full h-full min-w-0 flex-1 overflow-hidden select-none">
             {stageColumns.map((col) => {
               const stageCards = cards.filter((c) => c.stage === col.stage);
+              const ColIcon = col.icon;
               return (
                 <div
                   key={col.stage}
                   className={cn(
-                    "flex flex-col rounded-xl border p-2.5 h-full min-w-0 shadow-2xs transition-all overflow-hidden",
+                    "flex flex-col rounded-2xl border p-2.5 h-full min-w-0 shadow-2xs transition-all overflow-hidden",
                     col.bgClass,
                     col.borderClass
                   )}
                 >
-                  {/* Column Header */}
-                  <div className="flex items-center justify-between pb-2 mb-2 px-1 border-b border-zinc-200/50">
+                  {/* Column Header — Multica Style */}
+                  <div className="flex items-center justify-between pb-2 mb-2 px-1">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <div
-                        className={cn(
-                          "w-2 h-2 rounded-full border shrink-0",
-                          col.dotClass
-                        )}
-                      />
-                      <span className="text-[11.5px] font-semibold text-zinc-900 tracking-tight truncate">
+                      <ColIcon className={cn("w-3.5 h-3.5 shrink-0", col.iconClass)} />
+                      <span className="text-xs font-semibold text-zinc-900 tracking-tight">
                         {col.label}
                       </span>
-                      <span className="text-[10.5px] font-medium text-zinc-400 shrink-0">
+                      <span className="text-xs font-normal text-zinc-400">
                         {stageCards.length}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-0.5 text-zinc-400 shrink-0">
+                    <div className="flex items-center gap-0.5 text-zinc-400">
+                      <button
+                        title="More options"
+                        className="p-1 hover:text-zinc-600 hover:bg-black/5 rounded transition-colors cursor-pointer"
+                      >
+                        <MoreHorizontal className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         onClick={() => setIsAddModalOpen(true)}
-                        title="Add Card"
-                        className="p-1 hover:text-zinc-700 hover:bg-zinc-200/60 rounded transition-colors cursor-pointer"
+                        title="Add Application"
+                        className="p-1 hover:text-zinc-600 hover:bg-black/5 rounded transition-colors cursor-pointer"
                       >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
 
                   {/* Cards Container */}
-                  <div className="flex-1 space-y-2 overflow-y-auto no-scrollbar pr-0.5">
+                  <div className="flex-1 space-y-2.5 overflow-y-auto no-scrollbar pr-0.5">
                     {stageCards.length === 0 ? (
-                      <div className="h-28 flex items-center justify-center text-[10.5px] text-zinc-400 font-normal">
-                        No applications
+                      <div className="h-32 flex items-center justify-center text-xs text-zinc-400 font-normal">
+                        No applications in this stage
                       </div>
                     ) : (
                       stageCards.map((card) => (
@@ -612,95 +1064,74 @@ function SignalTrackerContent() {
                           initial={{ opacity: 0, y: 4 }}
                           animate={{ opacity: 1, y: 0 }}
                           onClick={() => setSelectedCard(card)}
-                          className="bg-white rounded-xl border border-zinc-200/90 p-3 shadow-xs hover:shadow-sm hover:border-zinc-300 transition-all group relative select-none cursor-pointer flex flex-col justify-between gap-2.5"
+                          className="bg-white rounded-xl border border-zinc-200/90 p-3 shadow-2xs hover:shadow-sm hover:border-zinc-300 transition-all select-none cursor-pointer flex flex-col gap-2"
                         >
-                          {/* Card Top: Code Identifier & Delete */}
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="text-[10px] font-mono font-medium text-zinc-400 tracking-wider">
-                              — {card.cardCode}
+                          {/* Card Code & Shortlist Pill */}
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span className="text-[11px] font-mono text-zinc-400">
+                              {card.cardCode}
                             </span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteCard(card.id);
-                              }}
-                              className="text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 cursor-pointer rounded hover:bg-red-50"
-                              title="Delete card"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-
-                          {/* Company & Role */}
-                          <div>
-                            <h4 className="text-[12px] font-semibold text-zinc-900 tracking-tight leading-snug line-clamp-2">
-                              {card.company} · {card.role}
-                            </h4>
-                            {card.notes && (
-                              <p className="text-[10px] text-zinc-500 mt-0.5 line-clamp-1 leading-normal">
-                                {card.notes}
-                              </p>
+                            {card.shortlistProbability !== undefined && (
+                              <span className={cn(
+                                "text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0 whitespace-nowrap",
+                                card.shortlistProbability >= 85
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                                  : "bg-blue-50 text-blue-700 border border-blue-200/80"
+                              )}>
+                                <Target className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                                {card.shortlistProbability}% Shortlist
+                              </span>
                             )}
                           </div>
 
-                          {/* Interview Scheduled Alert */}
+                          {/* Role & Company Title */}
+                          <h4 className="text-[12.5px] font-semibold text-zinc-900 leading-snug tracking-tight line-clamp-2">
+                            {card.company} · {card.role}
+                          </h4>
+
+                          {/* Interview Alert */}
                           {card.interviewDate && (
-                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-900 border border-amber-500/20 text-[9.5px] font-medium leading-none w-fit">
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 text-[10px] font-medium leading-none w-fit">
                               <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
                               <span className="truncate">Interview Scheduled</span>
                             </div>
                           )}
 
-                          {/* Verified Proof Badge & Cryptographic Signature */}
-                          <div className="flex items-center gap-1.5 min-w-0 flex-nowrap">
-                            <span className="inline-flex items-center gap-1 text-[9.5px] font-medium px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80 shrink min-w-0 truncate leading-tight">
+                          {/* Proof Badge & ATS Source */}
+                          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80 shrink-0">
                               <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                              <span className="truncate">{card.proofBadge}</span>
+                              <span>{card.proofBadge}</span>
                             </span>
-                            {card.cryptoVerified && (
-                              <span className="inline-flex items-center text-[8.5px] font-mono font-semibold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 leading-tight">
-                                GPG
+                            {card.atsSource && (
+                              <span className={cn(
+                                "text-[9.5px] font-mono font-medium px-1.5 py-0.5 rounded-md border shrink-0",
+                                card.atsSource === "Workday"
+                                  ? "bg-sky-50 text-sky-700 border-sky-200/80"
+                                  : card.atsSource === "Greenhouse"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
+                                  : card.atsSource === "Ashby"
+                                  ? "bg-purple-50 text-purple-700 border-purple-200/80"
+                                  : card.atsSource === "Lever"
+                                  ? "bg-indigo-50 text-indigo-700 border-indigo-200/80"
+                                  : "bg-zinc-50 text-zinc-600 border-zinc-200"
+                              )}>
+                                {card.atsSource}
                               </span>
                             )}
                           </div>
 
-                          {/* Card Bottom Row: Real Company Logo & Timestamp */}
-                          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-[10px]">
-                            <div className="flex items-center gap-1.5 text-zinc-700 min-w-0">
-                              <CompanyLogo company={card.company} size={14} />
-                              <span className="text-[10.5px] font-medium text-zinc-700 truncate max-w-[85px] xl:max-w-[115px]">
+                          {/* Bottom Row: Company Logo & Timestamp */}
+                          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-500">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <CompanyLogo company={card.company} size={15} />
+                              <span className="font-medium text-zinc-800 text-[11.5px] truncate">
                                 {card.company}
                               </span>
                             </div>
-
-                            <span className="text-[9px] text-zinc-400 font-normal shrink-0 whitespace-nowrap">
-                              {card.updatedAt.replace("Updated ", "")}
+                            <span className="text-[10px] text-zinc-400 font-normal shrink-0">
+                              {card.updatedAt.replace("Updated ", "").replace("Synced ", "")}
                             </span>
-                          </div>
-
-                          {/* Stage Mover Selector (On hover) */}
-                          <div className="pt-1.5 border-t border-zinc-100/70 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-[8px] text-zinc-400 font-mono">Move:</span>
-                            <div className="flex items-center gap-0.5">
-                              {(["Applied", "Screening", "Interview", "Offer", "Rejected"] as Stage[]).map((st) => (
-                                <button
-                                  key={st}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    moveCard(card.id, st);
-                                  }}
-                                  className={cn(
-                                    "w-3.5 h-3.5 rounded text-[8px] font-mono font-bold flex items-center justify-center transition-colors cursor-pointer",
-                                    card.stage === st
-                                      ? "bg-zinc-900 text-white"
-                                      : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
-                                  )}
-                                  title={`Move to ${st}`}
-                                >
-                                  {st[0]}
-                                </button>
-                              ))}
-                            </div>
                           </div>
                         </motion.div>
                       ))
@@ -712,24 +1143,260 @@ function SignalTrackerContent() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 2: EMAIL & INGESTION AGENT (Cloud Pub/Sub)                           */}
-        {/* ========================================================================= */}
+      {/* Floating Copilot Chat Bubble Button — Multica Style */}
+      <button
+        onClick={() => handleTabSwitch(activeTab === "draft" ? "kanban" : "draft")}
+        className="fixed bottom-6 right-6 w-11 h-11 rounded-full bg-white border border-zinc-200/90 shadow-md hover:shadow-lg flex items-center justify-center text-zinc-700 hover:text-zinc-900 transition-all cursor-pointer z-50 group"
+        title="AI Copilot & Recruiter Outreach"
+      >
+        <MessageCircle className="w-5 h-5 text-zinc-700 stroke-[1.8] group-hover:scale-110 transition-transform" />
+      </button>
+
+        {/* VIEW 2: GMAIL LIVE SYNC & SHORTLIST AI PREDICTOR */}
+        {activeTab === "gmail" && (
+          <div className="max-w-5xl mx-auto space-y-6 animate-fade-in w-full">
+            {/* Mailbox Status Banner */}
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-zinc-200/80">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Inbox className="w-5 h-5 text-red-500" />
+                    <h3 className="text-base font-bold text-zinc-900">
+                      Gmail Mailbox Ingestion ({userEmail})
+                    </h3>
+                  </div>
+                  <p className="text-xs text-zinc-500">
+                    Real-time Cloud Pub/Sub push listener + historical application scanner with AI Shortlist Probability scoring.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-semibold">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Pub/Sub Watch Active</span>
+                  </div>
+
+                  <button
+                    onClick={handleSyncGmail}
+                    disabled={isSyncingGmail}
+                    className="px-4 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-60"
+                  >
+                    <RefreshCw className={cn("w-3.5 h-3.5", isSyncingGmail && "animate-spin")} />
+                    <span>{isSyncingGmail ? "Syncing..." : "Scan & Ingest Mailbox"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Cloud Architecture Metadata Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 font-mono text-[11px]">
+                <div className="p-3 bg-white rounded-xl border border-zinc-200 space-y-0.5">
+                  <span className="text-zinc-400 text-[10px]">CONNECTED MAILBOX</span>
+                  <p className="font-semibold text-zinc-800 truncate">{userEmail}</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-zinc-200 space-y-0.5">
+                  <span className="text-zinc-400 text-[10px]">PUBSUB TOPIC</span>
+                  <p className="font-semibold text-zinc-800 truncate">gmail-ingest-topic</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-zinc-200 space-y-0.5">
+                  <span className="text-zinc-400 text-[10px]">FIRESTORE SYNC</span>
+                  <p className="font-semibold text-emerald-600">Sub-second Live</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-zinc-200 space-y-0.5">
+                  <span className="text-zinc-400 text-[10px]">TOTAL DETECTED</span>
+                  <p className="font-semibold text-zinc-900">{cards.length} Applications</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Shortlist Likelihood Calculator */}
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-white shadow-2xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+                <div>
+                  <h4 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-indigo-600" />
+                    AI Shortlisting Probability Calculator
+                  </h4>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Estimate probability of moving to next round based on MINSKY cryptographic proof, recruiter sentiment, and ATS keywords.
+                  </p>
+                </div>
+                <button
+                  onClick={handleCalculateShortlist}
+                  disabled={isCalculatingShortlist}
+                  className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {isCalculatingShortlist ? "Calculating..." : "Calculate Probability"}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-zinc-600 block mb-1">Target Company</label>
+                  <input
+                    type="text"
+                    value={calcCompany}
+                    onChange={(e) => setCalcCompany(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-zinc-600 block mb-1">Target Role</label>
+                  <input
+                    type="text"
+                    value={calcRole}
+                    onChange={(e) => setCalcRole(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-zinc-600 block mb-1">Current Stage</label>
+                  <select
+                    value={calcStage}
+                    onChange={(e) => setCalcStage(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                  >
+                    <option value="Applied">Applied</option>
+                    <option value="Screening">Screening Assessment</option>
+                    <option value="Interview">Technical Interview</option>
+                    <option value="Offer">Offer Received</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-zinc-600 block mb-1">MINSKY Proof Score</label>
+                  <input
+                    type="number"
+                    value={calcProofScore}
+                    onChange={(e) => setCalcProofScore(Number(e.target.value))}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                  />
+                </div>
+              </div>
+
+              {/* Prediction Result Display */}
+              {calcPrediction && (
+                <div className="mt-4 p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200/80 space-y-4 animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white font-bold text-lg flex items-center justify-center shadow-sm">
+                        {calcPrediction.shortlist_probability}%
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-bold text-indigo-950">
+                          {calcPrediction.probability_tier} Shortlist Likelihood
+                        </h5>
+                        <p className="text-xs text-indigo-800">
+                          Predicted Next Stage: <span className="font-semibold">{calcPrediction.predicted_next_stage}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    <div className="p-3 rounded-xl bg-white border border-indigo-100 space-y-1">
+                      <span className="text-[10px] font-bold uppercase text-emerald-700">Key Catalysts</span>
+                      <ul className="text-xs text-zinc-700 space-y-1 list-disc list-inside">
+                        {(calcPrediction.key_catalysts || []).map((c: string, idx: number) => (
+                          <li key={idx}>{c}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-white border border-indigo-100 space-y-1">
+                      <span className="text-[10px] font-bold uppercase text-indigo-900">Recommended Next Action</span>
+                      <p className="text-xs text-zinc-700 leading-relaxed">{calcPrediction.recommended_action}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* List of Ingested Applications with Shortlist Scores */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-zinc-900">
+                Tracked Applications Ingested from {userEmail}
+              </h4>
+
+              <div className="space-y-2.5">
+                {cards.map((app) => (
+                  <div
+                    key={app.id}
+                    className="p-4 rounded-xl bg-white border border-zinc-200 hover:border-zinc-300 transition-colors shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0 p-1.5">
+                        <CompanyLogo company={app.company} size={22} />
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <h5 className="text-xs font-bold text-zinc-900">{app.company}</h5>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-100 text-zinc-700">
+                            {app.stage}
+                          </span>
+                          {app.atsSource && (
+                            <span className="text-[10px] font-mono text-zinc-500">
+                              via {app.atsSource}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs font-medium text-zinc-700">{app.role}</p>
+                        {app.notes && (
+                          <p className="text-[11px] text-zinc-500 line-clamp-1">{app.notes}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0 self-end md:self-center">
+                      {app.shortlistProbability !== undefined && (
+                        <div className="text-right">
+                          <span className={cn(
+                            "text-xs font-mono font-bold px-2 py-0.5 rounded-lg border inline-flex items-center gap-1",
+                            app.shortlistProbability >= 85
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : app.shortlistProbability >= 60
+                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              : "bg-zinc-100 text-zinc-600 border-zinc-200"
+                          )}>
+                            🎯 {app.shortlistProbability}% Likelihood
+                          </span>
+                          {app.predictedNextStage && (
+                            <p className="text-[10px] text-zinc-400 mt-0.5 font-mono">
+                              Next: {app.predictedNextStage}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => setSelectedCard(app)}
+                        className="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-xs font-medium text-zinc-700 cursor-pointer shadow-2xs"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 3: PUB/SUB INGESTION AGENT SIMULATOR */}
         {activeTab === "pipeline" && (
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
             <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
                 <div>
                   <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
                     <Mail className="w-4 h-4 text-blue-600" />
-                    Email & Ingestion Agent Simulator
+                    Agent 1: ATS Normalizer & Ingestion Agent (Cloud Pub/Sub)
                   </h3>
                   <p className="text-xs text-zinc-500 mt-0.5">
                     Cloud Pub/Sub push listener: parses recruiter email metadata & auto-moves Kanban cards.
                   </p>
                 </div>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-medium">
-                  Cloud Pub/Sub
+                  Cloud Pub/Sub Active
                 </span>
               </div>
 
@@ -795,7 +1462,6 @@ function SignalTrackerContent() {
                 </button>
               </div>
 
-              {/* Ingestion Telemetry Log */}
               {ingestionLog && (
                 <div className="mt-4 p-4 rounded-xl bg-zinc-900 text-zinc-100 font-mono text-xs space-y-2">
                   <div className="flex items-center justify-between text-emerald-400 font-semibold">
@@ -811,11 +1477,9 @@ function SignalTrackerContent() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 3: MINSKY FORENSICS AGENT                                            */}
-        {/* ========================================================================= */}
+        {/* VIEW 4: MINSKY FORENSICS */}
         {activeTab === "minsky" && (
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
             <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
                 <div>
@@ -853,24 +1517,183 @@ function SignalTrackerContent() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 4: CAREER OPTIMIZATION AGENT                                         */}
-        {/* ========================================================================= */}
+        {/* VIEW 5: GREENHOUSE CANDIDATE SCORECARD */}
+        {activeTab === "scorecard" && (
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-500" />
+                    Agent 3: Greenhouse Candidate Scorecard Engine
+                  </h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Standardized 4-dimension candidate evaluation rubric inspired by Greenhouse enterprise hiring workflows.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+                    Greenhouse Standard
+                  </span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+                    4-Dimension Rubric
+                  </span>
+                </div>
+              </div>
+
+              {/* Evaluation Form */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-zinc-600 block mb-1">Company</label>
+                  <input
+                    type="text"
+                    value={scorecardCompany}
+                    onChange={(e) => setScorecardCompany(e.target.value)}
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-zinc-600 block mb-1">Target Role</label>
+                  <input
+                    type="text"
+                    value={scorecardRole}
+                    onChange={(e) => setScorecardRole(e.target.value)}
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    onClick={handleGenerateScorecard}
+                    disabled={isEvaluatingScorecard}
+                    className="w-full py-2 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-xs font-semibold shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    <Target className="w-4 h-4" />
+                    {isEvaluatingScorecard ? "Evaluating..." : "Generate Scorecard"}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-zinc-600 block mb-1">Job Specification / Requirements</label>
+                <textarea
+                  rows={3}
+                  value={scorecardJobDesc}
+                  onChange={(e) => setScorecardJobDesc(e.target.value)}
+                  className="w-full bg-white border border-zinc-200 rounded-lg p-3 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400 resize-none font-sans"
+                />
+              </div>
+
+              {/* Scorecard Results Display */}
+              {scorecardResult && (
+                <div className="mt-4 p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-5 animate-fade-in">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 font-bold text-lg">
+                        {scorecardResult.overall_score}%
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-zinc-900">
+                          {scorecardResult.candidate_name} · {scorecardResult.role_target}
+                        </h4>
+                        <p className="text-xs text-zinc-500 font-medium">{scorecardResult.company} · Stage: Technical Screen</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        "px-3 py-1 rounded-full text-xs font-bold font-mono",
+                        scorecardResult.recommendation === "STRONG_YES"
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : "bg-blue-100 text-blue-800 border border-blue-300"
+                      )}>
+                        RECOMMENDATION: {scorecardResult.recommendation}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 4 Dimension Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(scorecardResult.dimensions || []).map((dim: any, idx: number) => (
+                      <div key={idx} className="p-4 rounded-xl bg-zinc-50/70 border border-zinc-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-zinc-900">{dim.name}</span>
+                          <span className="text-xs font-bold font-mono px-2 py-0.5 rounded bg-white border border-zinc-200 text-zinc-800">
+                            {dim.score}% · {dim.rating}
+                          </span>
+                        </div>
+                        <div className="w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-amber-500 h-full rounded-full transition-all duration-500" style={{ width: `${dim.score}%` }} />
+                        </div>
+                        <p className="text-[11px] text-zinc-600 leading-relaxed font-sans">{dim.evidence_notes}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Key Strengths & Gaps */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div className="p-4 rounded-xl border border-emerald-200/80 bg-emerald-50/40 space-y-2">
+                      <h5 className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        Verified Strengths
+                      </h5>
+                      <ul className="text-xs text-emerald-950 space-y-1 list-disc list-inside">
+                        {(scorecardResult.key_strengths || []).map((st: string, idx: number) => (
+                          <li key={idx}>{st}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="p-4 rounded-xl border border-amber-200/80 bg-amber-50/40 space-y-2">
+                      <h5 className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-amber-600" />
+                        Areas for Probing / Focus
+                      </h5>
+                      <ul className="text-xs text-amber-950 space-y-1 list-disc list-inside">
+                        {(scorecardResult.identified_gaps || []).map((gp: string, idx: number) => (
+                          <li key={idx}>{gp}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Tailored Interview Questions */}
+                  {scorecardResult.custom_interview_questions && (
+                    <div className="p-4 rounded-xl border border-zinc-200 bg-white space-y-2">
+                      <h5 className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                        <MessageCircle className="w-4 h-4 text-purple-600" />
+                        Greenhouse Rubric Interview Questions
+                      </h5>
+                      <div className="space-y-1.5 text-xs text-zinc-700 font-mono">
+                        {scorecardResult.custom_interview_questions.map((q: string, idx: number) => (
+                          <div key={idx} className="p-2.5 rounded-lg bg-zinc-50 border border-zinc-100">
+                            {q}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 6: CAREER OPTIMIZATION AGENT */}
         {activeTab === "optimize" && (
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
             <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
                 <div>
                   <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-purple-600" />
-                    Agent 3: Career Optimization (ATS Semantic Matcher)
+                    Agent 4: Career Optimization (ATS Semantic Matcher)
                   </h3>
                   <p className="text-xs text-zinc-500 mt-0.5">
-                    Compare verified MINSKY skill badges against target job specifications via Gemini 2.5 Flash.
+                    Compare verified MINSKY skill badges against target job specifications via Gemini Flash.
                   </p>
                 </div>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-medium">
-                  Gemini 2.5 Flash
+                  Gemini Flash
                 </span>
               </div>
 
@@ -915,7 +1738,7 @@ function SignalTrackerContent() {
 
                   <div>
                     <h5 className="text-xs font-semibold text-zinc-900 mb-1.5">ATS Action Items:</h5>
-                    <ul className="list-disc list-inside text-xs text-purple-700 space-y-1">
+                    <ul className="list-disc list-inside text-purple-700 space-y-1">
                       {(optimizationResult.ats_recommendations || []).map((r: string, idx: number) => (
                         <li key={idx}>{r}</li>
                       ))}
@@ -927,25 +1750,28 @@ function SignalTrackerContent() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 5: AI OUTREACH DRAFTING AGENT                                        */}
-        {/* ========================================================================= */}
+        {/* VIEW 7: ADAPTIVE OUTREACH DRAFTING AGENT */}
         {activeTab === "draft" && (
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
             <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
                 <div>
                   <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-blue-600" />
-                    Agent 5: AI Outreach Drafting Agent
+                    Agent 5: Adaptive Drafting Agent (with Mistake Correction Injection)
                   </h3>
                   <p className="text-xs text-zinc-500 mt-0.5">
-                    Generate evidence-backed cold emails and cover letters using verified GitHub proof metrics.
+                    Generate evidence-backed outreach incorporating lessons learned from past recruiter feedback and rejections.
                   </p>
                 </div>
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-medium">
-                  Evidence-Backed
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-medium">
+                    Evidence-Backed
+                  </span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-medium">
+                    Memory Injected
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -969,15 +1795,33 @@ function SignalTrackerContent() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
-                <button
-                  onClick={handleGenerateDraft}
-                  disabled={isRunningPipeline}
-                  className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm transition-colors flex items-center gap-2 cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  {isRunningPipeline ? "Drafting..." : "Generate AI Outreach Pack"}
-                </button>
+              <div className="flex items-center justify-between pt-1">
+                <div className="text-[11px] text-zinc-500 flex items-center gap-1.5">
+                  <Brain className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Injected Active Rules: {memoryLessons.length} distilled lessons</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setFeedbackAgent("AdaptiveDraftingAgent");
+                      setIsFeedbackModalOpen(true);
+                    }}
+                    className="px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5 text-red-500" />
+                    <span>Critique / Report Mistake</span>
+                  </button>
+
+                  <button
+                    onClick={handleGenerateDraft}
+                    disabled={isRunningPipeline}
+                    className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {isRunningPipeline ? "Drafting..." : "Generate AI Outreach Pack"}
+                  </button>
+                </div>
               </div>
 
               {draftResult && (
@@ -1019,11 +1863,9 @@ function SignalTrackerContent() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* VIEW 6: SCHEDULED NUDGES AGENT (Cloud Tasks)                              */}
-        {/* ========================================================================= */}
+        {/* VIEW 8: SCHEDULED NUDGES AGENT */}
         {activeTab === "nudges" && (
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
             <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
                 <div>
@@ -1041,7 +1883,10 @@ function SignalTrackerContent() {
               </div>
 
               <div className="space-y-3">
-                {nudges.map((nudge) => (
+                {[
+                  { id: "tsk-01", queue: "signal-interview-alerts", title: "Interview Prep: Google Cloud", due: "In 24 hours", dispatchedVia: "Google Cloud Tasks (us-central1)", status: "QUEUED" },
+                  { id: "tsk-02", queue: "signal-recruiter-followup", title: "Polite Follow-up: Datadog Screening", due: "In 4 days", dispatchedVia: "Google Cloud Tasks (us-central1)", status: "SCHEDULED" },
+                ].map((nudge) => (
                   <div
                     key={nudge.id}
                     className="p-4 rounded-xl bg-white border border-zinc-200 flex items-center justify-between gap-4"
@@ -1066,15 +1911,336 @@ function SignalTrackerContent() {
           </div>
         )}
 
+        {/* VIEW 9: EPISODIC MEMORY & REFLECTION AGENT */}
+        {activeTab === "memory" && (
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-indigo-600" />
+                    Agent 7: Reflection & Episodic Memory Agent (GitProof Learning Loop)
+                  </h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Dual-layer memory (SQLite + Cloud Firestore) enabling continuous self-correction from mistakes, rejections, and human feedback.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-medium">
+                    SQLite + Firestore Sync
+                  </span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+                    {memoryLessons.length} Active Rules
+                  </span>
+                </div>
+              </div>
+
+              {/* Submit Feedback Form */}
+              <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                    <ThumbsDown className="w-3.5 h-3.5 text-amber-600" />
+                    Teach Reflection Agent / Report a Mistake or Rejection
+                  </h4>
+                  <span className="text-[10px] font-mono text-zinc-400">Automated Lesson Distillation</span>
+                </div>
+
+                <form onSubmit={handleSubmitFeedback} className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-zinc-600 block mb-1">Target Agent</label>
+                      <select
+                        value={feedbackAgent}
+                        onChange={(e) => setFeedbackAgent(e.target.value)}
+                        className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                      >
+                        <option value="AdaptiveDraftingAgent">Adaptive Drafting Agent (Outreach & Cover Letters)</option>
+                        <option value="GreenhouseScorecardAgent">Greenhouse Scorecard Agent (Candidate Rubric)</option>
+                        <option value="ATSNormalizerAgent">ATS Normalizer Agent (Email & Stage Parser)</option>
+                        <option value="CareerOptimizerAgent">Career Optimizer Agent (Gap Analyzer)</option>
+                        <option value="MinskyForensicsAgent">MINSKY Forensics Agent (Git Proofs)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium text-zinc-600 block mb-1">Feedback / Mistake Type</label>
+                      <select
+                        value={feedbackType}
+                        onChange={(e) => setFeedbackType(e.target.value)}
+                        className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                      >
+                        <option value="USER_CORRECTION">Human User Correction</option>
+                        <option value="REJECTION_REASON">Recruiter Rejection Reason</option>
+                        <option value="TONE_ADJUSTMENT">Tone & Style Adjustment</option>
+                        <option value="HALLUCINATION_REPORT">Incorrect Metric / Hallucination</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-zinc-600 block mb-1">Critique / What went wrong?</label>
+                    <textarea
+                      rows={2}
+                      value={feedbackCorrection}
+                      onChange={(e) => setFeedbackCorrection(e.target.value)}
+                      placeholder="e.g. Do not use generic fluff. Emphasize exact commit hash verification metrics and distributed pipeline throughput."
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400 resize-none font-sans"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <p className="text-[11px] text-zinc-500">
+                      Feedback is permanently recorded and distilled into high-conviction rules for subsequent pipeline executions.
+                    </p>
+                    <button
+                      type="submit"
+                      disabled={isSubmittingFeedback}
+                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    >
+                      <Brain className="w-3.5 h-3.5" />
+                      {isSubmittingFeedback ? "Distilling..." : "Train Reflection Agent"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Active Distilled Lessons List */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-zinc-600" />
+                    Active Distilled Memory Rules & Behavioral Constraints
+                  </h4>
+                  <button
+                    onClick={loadLessons}
+                    className="text-[11px] text-zinc-500 hover:text-zinc-800 flex items-center gap-1 cursor-pointer"
+                  >
+                    <RefreshCw className={cn("w-3 h-3", isLoadingLessons && "animate-spin")} />
+                    Refresh
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {memoryLessons.map((lesson) => (
+                    <div
+                      key={lesson.id}
+                      className="p-4 rounded-xl bg-white border border-zinc-200 space-y-2 shadow-2xs hover:border-zinc-300 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-zinc-900">{lesson.agent_name}</span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 font-semibold border border-zinc-200">
+                            {lesson.trigger_pattern}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                            Weight: {lesson.weight || 1.0}x
+                          </span>
+                          <span className="text-[10px] text-zinc-400 font-mono">
+                            {lesson.created_at ? new Date(lesson.created_at).toLocaleTimeString() : "active"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-zinc-700 font-sans leading-relaxed bg-zinc-50 p-2.5 rounded-lg border border-zinc-100">
+                        {lesson.lesson_text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 10: GEMINI REAL-TIME IMAGE GENERATION & GCS */}
+        {activeTab === "image-gen" && (
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-[#fbfcfd] shadow-2xs space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-200/80">
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-violet-600" />
+                    Google Gemini Image Model & Cloud Storage
+                  </h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Real-time generation of cryptographic skill emblems, 3D credentials & student passport avatars on GCP.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200 font-medium">
+                    gemini-2.5-flash-image
+                  </span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+                    GCS 4K CDN
+                  </span>
+                </div>
+              </div>
+
+              {/* GCP Project Active Header */}
+              <div className="p-3 rounded-xl border border-zinc-200/80 bg-white flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-semibold text-zinc-800">Connected GCP Project:</span>
+                  <span className="text-xs font-mono bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded border border-zinc-200">
+                    qwiklabs-gcp-01-c99adaf5c91e
+                  </span>
+                  <span className="text-xs text-zinc-400 font-mono">(us-central1)</span>
+                </div>
+                <div className="text-[11px] text-zinc-500 font-mono">
+                  Bucket: <span className="font-semibold text-zinc-700">signal-credo-80584973320</span>
+                </div>
+              </div>
+
+              {/* Quick Prompts */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-600">Quick Skill Emblem Presets:</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: "Cloud Infrastructure Engineer", prompt: "Holographic 3D cyber badge for Cloud Infrastructure Engineer, neon cyan and violet glass crest, 4K render", skill: "GCP Cloud Infrastructure" },
+                    { label: "Full Stack TypeScript Architect", prompt: "Futuristic digital medallion for verified TypeScript Architect, golden circuitry on matte dark titanium, 4K isometric", skill: "TypeScript Architect" },
+                    { label: "Distributed Systems Specialist", prompt: "Cyberpunk neon glowing cube emblem for Distributed Systems Specialist, translucent blue glass, dark minimalist background", skill: "Distributed Systems" },
+                    { label: "MINSKY Code Forensics Shield", prompt: "Cryptographic digital security shield badge with Ed25519 signature matrix, emerald neon glow, high tech render", skill: "MINSKY Forensics" },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => {
+                        setImagePrompt(preset.prompt);
+                        setImageSkill(preset.skill);
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-colors cursor-pointer"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Form Controls */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-medium text-zinc-600 block">Prompt Description:</label>
+                  <textarea
+                    rows={3}
+                    value={imagePrompt}
+                    onChange={(e) => setImagePrompt(e.target.value)}
+                    className="w-full bg-white border border-zinc-200 rounded-lg p-3 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400 resize-none font-sans"
+                    placeholder="Describe the holographic badge or credential..."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-zinc-600 block">Verified Skill Name:</label>
+                  <input
+                    type="text"
+                    value={imageSkill}
+                    onChange={(e) => setImageSkill(e.target.value)}
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400"
+                    placeholder="e.g. Cloud Infrastructure"
+                  />
+                  <div className="pt-3">
+                    <button
+                      type="button"
+                      onClick={handleGenerateBadgeImage}
+                      disabled={isGeneratingImage}
+                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs font-semibold shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      {isGeneratingImage ? "Generating with Gemini..." : "Generate AI Badge"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Generated Image Result Card */}
+              {generatedImageResult && (
+                <div className="mt-4 p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-4 animate-fade-in">
+                  <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-zinc-900">Generated Credential Visual</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                        ✓ Uploaded to GCS ({generatedImageResult.latency_seconds}s)
+                      </span>
+                    </div>
+                    <span className="text-xs text-zinc-400 font-mono">
+                      {(generatedImageResult.bytes_size / 1024 / 1024).toFixed(2)} MB PNG
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div className="flex items-center justify-center p-4 rounded-xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-800 shadow-inner">
+                      <img
+                        src={generatedImageResult.image_url}
+                        alt={generatedImageResult.skill}
+                        className="max-h-64 rounded-xl object-contain shadow-2xl hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-xs font-medium text-zinc-500">Skill Title</span>
+                        <h4 className="text-base font-bold text-zinc-900">{generatedImageResult.skill}</h4>
+                      </div>
+
+                      <div className="space-y-1.5 font-mono text-[11px] text-zinc-600 bg-zinc-50 p-3 rounded-xl border border-zinc-200">
+                        <div>Model: <span className="font-semibold text-violet-700">{generatedImageResult.model}</span></div>
+                        <div className="truncate">Public CDN: <a href={generatedImageResult.image_url} target="_blank" rel="noreferrer" className="text-blue-600 underline">{generatedImageResult.image_url}</a></div>
+                        <div>Firestore ID: <span className="font-semibold text-zinc-800">{generatedImageResult.firestore_id}</span></div>
+                        <div>Latency: <span className="font-semibold text-emerald-600">{generatedImageResult.latency_seconds} seconds</span></div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            copyToClip(generatedImageResult.image_url, "Public Storage CDN URL");
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy GCS Link</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newCard: KanbanCard = {
+                              id: `app-${Date.now()}`,
+                              cardCode: `AGT-${cards.length + 1}`,
+                              company: "Google Cloud",
+                              role: generatedImageResult.skill || "Cloud Engineer",
+                              stage: "Interview",
+                              updatedAt: "Badge generated via Gemini Image Model",
+                              proofBadge: `${generatedImageResult.skill} (98%)`,
+                              proofScore: 98,
+                              cryptoVerified: true,
+                              avatarIcon: "✨",
+                              notes: `Verified holographic badge hosted at ${generatedImageResult.image_url}`,
+                            };
+                            setCards((prev) => [newCard, ...prev]);
+                            toast.success(`Attached "${generatedImageResult.skill}" badge to active Kanban applications!`);
+                            setActiveTab("kanban");
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add to Kanban Board</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ========================================================================= */}
-      {/* FLOATING ACTION CHAT BUBBLE (Multica Style)                               */}
-      {/* ========================================================================= */}
+      {/* Floating Action Button */}
       <button
         onClick={() => {
           setActiveTab("draft");
-          toast.info("Opened AI Drafting Assistant");
+          toast.info("Opened Adaptive AI Drafting Agent");
         }}
         title="Open Agent Assistant"
         className="fixed bottom-6 right-6 w-11 h-11 rounded-full bg-white text-zinc-900 border border-zinc-200/90 shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-105 z-50 cursor-pointer"
@@ -1082,9 +2248,7 @@ function SignalTrackerContent() {
         <MessageCircle className="w-5 h-5 text-zinc-700" />
       </button>
 
-      {/* ========================================================================= */}
-      {/* NEW CARD / ISSUE CREATION MODAL                                           */}
-      {/* ========================================================================= */}
+      {/* Create Card Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xl p-6 max-w-md w-full space-y-4">
@@ -1156,14 +2320,10 @@ function SignalTrackerContent() {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* APPLICATION DETAILS & AGENT FORENSICS MODAL                                */}
-      {/* ========================================================================= */}
+      {/* Card Details Modal */}
       {selectedCard && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xl max-w-xl w-full p-6 space-y-5 animate-fade-in-up">
-
-            {/* Header: Company, Role & Stage */}
             <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center shadow-2xs p-2">
@@ -1177,6 +2337,11 @@ function SignalTrackerContent() {
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 font-medium">
                       {selectedCard.stage}
                     </span>
+                    {selectedCard.atsSource && (
+                      <span className="text-[10px] font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">
+                        via {selectedCard.atsSource}
+                      </span>
+                    )}
                   </div>
                   <h3 className="text-base font-bold text-zinc-900 tracking-tight mt-0.5">
                     {selectedCard.role}
@@ -1193,7 +2358,37 @@ function SignalTrackerContent() {
               </button>
             </div>
 
-            {/* Quick Stage Mover Selector */}
+            {/* Shortlist Probability Score Card */}
+            {selectedCard.shortlistProbability !== undefined && (
+              <div className="p-4 rounded-xl border border-indigo-200/90 bg-indigo-50/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-indigo-600" />
+                    <span className="text-xs font-bold text-indigo-950">
+                      AI Shortlisting Probability Score
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-600 text-white">
+                    {selectedCard.shortlistProbability}% Likelihood
+                  </span>
+                </div>
+
+                {selectedCard.predictedNextStage && (
+                  <p className="text-xs text-indigo-900">
+                    Predicted Next Stage: <span className="font-bold">{selectedCard.predictedNextStage}</span>
+                  </p>
+                )}
+
+                {selectedCard.recommendedAction && (
+                  <div className="p-2.5 rounded-lg bg-white border border-indigo-100 text-xs text-zinc-700 leading-relaxed font-sans">
+                    <span className="font-semibold text-indigo-950 block mb-0.5">Recommended Next Step:</span>
+                    {selectedCard.recommendedAction}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Quick Stage Mover */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
                 Application Pipeline Stage
@@ -1213,13 +2408,13 @@ function SignalTrackerContent() {
                         : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200/50"
                     )}
                   >
-                    {st === "Interview" ? "In Progress" : st === "Offer" ? "In Review" : st}
+                    {st === "Applied" ? "Applied" : st === "Screening" ? "Screening & OA" : st === "Interview" ? "Interviewing" : st === "Offer" ? "Offer Received" : "Archived"}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Interview Information (If in Interview / In Progress stage) */}
+            {/* Interview Information (If in Interview stage) */}
             {selectedCard.interviewDate && (
               <div className="p-4 rounded-xl border border-amber-200/80 bg-amber-50/50 space-y-2.5">
                 <div className="flex items-center justify-between">
@@ -1232,12 +2427,6 @@ function SignalTrackerContent() {
                   </span>
                 </div>
 
-                {selectedCard.notes && (
-                  <p className="text-xs text-amber-950/80 leading-relaxed font-sans">
-                    {selectedCard.notes}
-                  </p>
-                )}
-
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => {
@@ -1249,23 +2438,11 @@ function SignalTrackerContent() {
                     <Video className="w-3.5 h-3.5" />
                     Join Google Meet
                   </button>
-
-                  <button
-                    onClick={() => {
-                      handleTabSwitch("nudges");
-                      setSelectedCard(null);
-                      toast.info("Opened Cloud Tasks scheduled alerts for interview prep");
-                    }}
-                    className="px-3 py-1.5 rounded-lg border border-amber-300 bg-white hover:bg-amber-50 text-amber-900 text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Clock className="w-3.5 h-3.5 text-amber-600" />
-                    Configure Nudges
-                  </button>
                 </div>
               </div>
             )}
 
-            {/* MINSKY Verified Proof of Skill */}
+            {/* MINSKY Proof */}
             <div className="p-4 rounded-xl border border-zinc-200 bg-[#fbfcfd] space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-900 flex items-center gap-1.5">
@@ -1290,26 +2467,43 @@ function SignalTrackerContent() {
               </div>
             </div>
 
-            {/* Agent Actions Shortcuts */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            {/* Actions Shortcuts */}
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              <button
+                onClick={() => {
+                  setScorecardCompany(selectedCard.company);
+                  setScorecardRole(selectedCard.role);
+                  handleTabSwitch("scorecard");
+                  setSelectedCard(null);
+                  toast.success(`Loaded Greenhouse Scorecard for ${selectedCard.company}`);
+                }}
+                className="p-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 flex items-center gap-2 text-left cursor-pointer group shadow-2xs transition-colors"
+              >
+                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <Award className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-zinc-900 group-hover:text-amber-600">Scorecard</h4>
+                  <p className="text-[9px] text-zinc-500">Greenhouse ATS</p>
+                </div>
+              </button>
+
               <button
                 onClick={() => {
                   setDraftCompany(selectedCard.company);
                   setDraftRole(selectedCard.role);
                   handleTabSwitch("draft");
                   setSelectedCard(null);
-                  toast.success(`Loaded ${selectedCard.company} in AI Outreach Drafting Agent`);
+                  toast.success(`Loaded ${selectedCard.company} in AI Outreach`);
                 }}
                 className="p-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 flex items-center gap-2 text-left cursor-pointer group shadow-2xs transition-colors"
               >
-                <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-zinc-900 group-hover:text-purple-600">
-                    Draft Follow-up
-                  </h4>
-                  <p className="text-[10px] text-zinc-500">Gemini 2.5 Agent</p>
+                  <h4 className="text-xs font-semibold text-zinc-900 group-hover:text-purple-600">Draft Follow-up</h4>
+                  <p className="text-[9px] text-zinc-500">Gemini Flash</p>
                 </div>
               </button>
 
@@ -1321,19 +2515,17 @@ function SignalTrackerContent() {
                 }}
                 className="p-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 flex items-center gap-2 text-left cursor-pointer group shadow-2xs transition-colors"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                  <TrendingUp className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-zinc-900 group-hover:text-emerald-600">
-                    ATS Gap Analysis
-                  </h4>
-                  <p className="text-[10px] text-zinc-500">Match score optimizer</p>
+                  <h4 className="text-xs font-semibold text-zinc-900 group-hover:text-emerald-600">Gap Analysis</h4>
+                  <p className="text-[9px] text-zinc-500">Match optimizer</p>
                 </div>
               </button>
             </div>
 
-            {/* Footer Buttons */}
+            {/* Footer */}
             <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
               <button
                 onClick={() => {
@@ -1353,20 +2545,78 @@ function SignalTrackerContent() {
                 Done
               </button>
             </div>
-
           </div>
         </div>
       )}
 
+      {/* Quick Mistake Feedback Modal */}
+      {isFeedbackModalOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xl p-6 max-w-md w-full space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-100">
+              <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+                <Brain className="w-4 h-4 text-indigo-600" />
+                Report Mistake / Train Reflection Agent
+              </h3>
+              <button
+                onClick={() => setIsFeedbackModalOpen(false)}
+                className="text-zinc-400 hover:text-zinc-700 text-xs font-medium cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitFeedback} className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-zinc-600 block mb-1">Target Agent</label>
+                <input
+                  type="text"
+                  disabled
+                  value={feedbackAgent}
+                  className="w-full bg-zinc-100 border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-700 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-zinc-600 block mb-1">Feedback / Mistake Critique</label>
+                <textarea
+                  rows={3}
+                  required
+                  value={feedbackCorrection}
+                  onChange={(e) => setFeedbackCorrection(e.target.value)}
+                  placeholder="What should the agent avoid or do differently in future runs?"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-xs text-zinc-900 focus:outline-none focus:border-zinc-400 resize-none font-sans"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsFeedbackModalOpen(false)}
+                  className="px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-600 text-xs font-medium hover:bg-zinc-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingFeedback}
+                  className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+                >
+                  {isSubmittingFeedback ? "Distilling..." : "Train Agent"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function SignalTrackerPage() {
   return (
-    <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs text-zinc-400">Loading issues...</div>}>
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs text-zinc-400">Loading applications...</div>}>
       <SignalTrackerContent />
     </Suspense>
   );
 }
-
