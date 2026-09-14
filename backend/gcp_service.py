@@ -16,7 +16,7 @@ LOCATION = os.getenv("GCP_REGION", "us-central1")
 TOPIC_ID = os.getenv("PUBSUB_TOPIC", "gmail-ingest-topic")
 SUBSCRIPTION_ID = os.getenv("PUBSUB_SUBSCRIPTION", "gmail-ingest-sub")
 BUCKET_NAME = os.getenv("GCS_BUCKET", "signal-credo-80584973320")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", "AIzaSyDm4hIWo64pJnv6zk4Q8vAXsv06wtATE70"))
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", ""))
 
 CREDS_PATH = str(Path(__file__).parent / "gcp-credentials.json")
 if os.path.exists(CREDS_PATH):
@@ -32,7 +32,10 @@ _genai_client = None
 def get_genai_client() -> genai.Client:
     global _genai_client
     if _genai_client is None:
-        _genai_client = genai.Client(api_key=GEMINI_API_KEY)
+        if GEMINI_API_KEY:
+            _genai_client = genai.Client(api_key=GEMINI_API_KEY)
+        else:
+            _genai_client = genai.Client()
     return _genai_client
 
 

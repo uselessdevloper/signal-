@@ -27,10 +27,10 @@ export async function generateAiRoadmap(goalTitle: string, missingSkills: string
     throw new Error("No passport found. Generate one first.");
   }
 
-  const apiKey = process.env.AICREDIT_API_KEY || "sk-live-3c1d02c99d29fbf0b826af39454c2944d7045dea6b4fe022f1ddbe72eaf05068";
+  const apiKey = process.env.AICREDIT_API_KEY || "";
   let parsedRoadmap;
 
-  if (apiKey === "your-ai-api-key") {
+  if (!apiKey || apiKey === "your-ai-api-key") {
     // Fallback Mock for testing if no API key is provided
     console.warn("No valid API_KEY provided. Using mocked roadmap.");
     parsedRoadmap = {
