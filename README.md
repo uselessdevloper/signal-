@@ -22,6 +22,18 @@ An end-to-end multi-agent orchestration platform built with Google Cloud Platfor
 
 ---
 
+## 🌐 Live Production Deployments (Google Cloud Platform)
+
+| Service | Platform | Live URL | Description |
+| :--- | :--- | :--- | :--- |
+| **Frontend Web App** | **Google Cloud Run** | **[https://signal-frontend-80584973320.us-central1.run.app](https://signal-frontend-80584973320.us-central1.run.app)** | Production Next.js 16 Web Application & Student ID Passport Hub |
+| **Backend API & Agents** | **Google Cloud Run** | **[https://signal-backend-80584973320.us-central1.run.app](https://signal-backend-80584973320.us-central1.run.app)** | FastAPI 6-Agent LangGraph Pipeline & GCP Native Hub |
+| **Interactive API Docs** | **FastAPI Swagger UI** | **[https://signal-backend-80584973320.us-central1.run.app/docs](https://signal-backend-80584973320.us-central1.run.app/docs)** | Real-time OpenAPI Endpoint Explorer |
+| **Google Cloud Hub** | **Cloud Run** | **[https://signal-frontend-80584973320.us-central1.run.app/dashboard/integrations](https://signal-frontend-80584973320.us-central1.run.app/dashboard/integrations)** | Live Vertex Search Grounding, Cloud TTS & BigQuery Radar |
+| **Live Kanban Tracker** | **Cloud Run** | **[https://signal-frontend-80584973320.us-central1.run.app/dashboard/tracker](https://signal-frontend-80584973320.us-central1.run.app/dashboard/tracker)** | Real-time Stage Ingestion & Application Board |
+
+---
+
 ## 📖 Overview
 
 **SIGNAL** (**S**implified **I**nformation for **G**uiding **N**etworked **A**pplications & **L**eads) eliminates the friction, ATS black-boxes, and manual overhead of modern technical job hunting.

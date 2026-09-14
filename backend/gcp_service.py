@@ -32,8 +32,20 @@ _subscriber_client = None
 _genai_client = None
 
 
+import google.auth
+from google.auth.transport.requests import Request as GoogleAuthRequest
+
 def get_gcloud_auth_token() -> str:
-    """Retrieve active gcloud access token dynamically for authenticated GCP REST calls."""
+    """Retrieve active GCP auth token using google.auth.default (ADC / Cloud Run metadata / Service Account) with CLI fallback."""
+    try:
+        credentials, project = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+        if not credentials.valid:
+            credentials.refresh(GoogleAuthRequest())
+        if credentials.token:
+            return credentials.token
+    except Exception as e:
+        print(f"ADC token note: {e}")
+
     try:
         return subprocess.check_output(["gcloud", "auth", "print-access-token"], text=True).strip()
     except Exception as e:

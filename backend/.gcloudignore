@@ -1,0 +1,12 @@
+.gcloudignore
+.git
+.gitignore
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+gcp-credentials.json
+.DS_Store

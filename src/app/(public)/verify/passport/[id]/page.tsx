@@ -11,11 +11,17 @@ interface Props {
 export default async function VerifyPassportPage({ params }: Props) {
   const { id } = await params;
 
-  const supabase = createAdminClient();
-  const { data: passports } = await supabase
-    .from("passports")
-    .select("*, profiles(*)")
-    .order("generated_at", { ascending: false });
+  let passports: any[] | null = null;
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("passports")
+      .select("*, profiles(*)")
+      .order("generated_at", { ascending: false });
+    passports = data;
+  } catch (err) {
+    // Graceful fallback for demo verification
+  }
 
   // Find passport matching student_id or card_id or fallback
   const matched = passports?.find((p: any) => {

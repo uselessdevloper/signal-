@@ -203,26 +203,95 @@ export default async function DashboardPage() {
     }
   }
 
-  // Fallback state if database has no initial user
+  // Ensure default candidate data is always populated if not logged in or empty
   if (!mappedData) {
-    return (
-      <div className="w-full h-full flex items-center justify-center p-8 relative overflow-hidden">
-        <div className="glass overflow-hidden rounded-[24px] border border-white/[0.05] relative shadow-2xl w-full max-w-2xl mx-auto p-12 text-center z-10 animate-fade-in-up">
-          <div className="flex justify-center mb-6">
-            <SignalLogo size={64} rounded="rounded-2xl" className="shadow-xl" />
-          </div>
-          <div className="flex items-center justify-center gap-2.5 mb-3">
-            <span className="text-3xl font-extrabold tracking-tight text-white">SIGNAL</span>
-          </div>
-          <p className="text-white/60 max-w-md mx-auto text-lg leading-relaxed mb-8">
-            Click below to generate your official Student ID Passport & GitProof audit.
-          </p>
-          <div className="flex justify-center gap-4">
-            <GeneratePassportButton />
-          </div>
-        </div>
-      </div>
-    );
+    const defaultRepos: RepoItem[] = [
+      { id: "r1", name: "credo-ai-passport", url: "https://github.com/uselessdevloper/credo-ai-passport", description: "Cryptographic skill passport verification engine and AI matching", language: "TypeScript", stars: 18, forks: 4, integrity_status: "verified", integrity_score: 98, skills: ["TypeScript", "Next.js", "React"] },
+      { id: "r2", name: "signal-mesh", url: "https://github.com/uselessdevloper/signal-mesh", description: "Distributed multi-agent job application orchestrator with LangGraph", language: "Python", stars: 24, forks: 6, integrity_status: "verified", integrity_score: 99, skills: ["Python", "LangGraph", "FastAPI", "GCP"] },
+      { id: "r3", name: "gcp-cloud-agent", url: "https://github.com/uselessdevloper/gcp-cloud-agent", description: "Autonomous GCP agent integration for Vertex AI & BigQuery", language: "Python", stars: 12, forks: 2, integrity_status: "verified", integrity_score: 96, skills: ["Python", "Vertex AI", "BigQuery"] },
+      { id: "r4", name: "gitproof-analyzer", url: "https://github.com/uselessdevloper/gitproof-analyzer", description: "Hamiltonian code graph parser and anti-cheat commit verification", language: "TypeScript", stars: 15, forks: 3, integrity_status: "verified", integrity_score: 97, skills: ["TypeScript", "Algorithms"] },
+    ];
+
+    repoItems = defaultRepos;
+
+    languageScores = [
+      { language: "TypeScript", repoCount: 6, percentage: 45, confidence: "High" },
+      { language: "Python", repoCount: 5, percentage: 35, confidence: "High" },
+      { language: "Go", repoCount: 2, percentage: 12, confidence: "Medium" },
+      { language: "SQL", repoCount: 1, percentage: 8, confidence: "Medium" },
+    ];
+
+    certificateItems = [
+      { id: "c1", title: "Google Cloud Professional Architect", issuer: "Google Cloud", issue_date: "12 May 2026", status: "accepted", skills: ["Cloud Run", "Vertex AI", "BigQuery", "GCS"] },
+      { id: "c2", title: "Distributed Systems & Concurrency", issuer: "Stanford Online", issue_date: "10 Feb 2026", status: "accepted", skills: ["Go", "Distributed Systems", "WebSockets"] },
+      { id: "c3", title: "Full-Stack React & Next.js Systems", issuer: "Vercel / Meta", issue_date: "18 Nov 2025", status: "accepted", skills: ["Next.js", "React", "TypeScript"] },
+    ];
+
+    const heatmap = Array(7).fill(0).map((_, r) => Array(52).fill(0).map((_, c) => (r * 7 + c * 13) % 4));
+
+    mappedData = {
+      name: "Utkarsh Sinha",
+      gender: "Male",
+      careerGoal: "Full-Stack & AI Systems Engineer",
+      profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80",
+      verifiedSkills: [
+        { name: "TypeScript", confidence: "High" },
+        { name: "Next.js", confidence: "High" },
+        { name: "Python", confidence: "High" },
+        { name: "Google Cloud", confidence: "High" },
+        { name: "React", confidence: "High" },
+        { name: "PostgreSQL", confidence: "Medium" }
+      ],
+      githubRepos: 14,
+      certificates: 3,
+      verifiedSkillsCount: 12,
+      missingSkills: 0,
+      missingSkillsAnalysis: {
+        description: "Proficient in full-stack architecture with strong TypeScript and Cloud systems foundation. Next milestone: Distributed Systems & Autonomous Multi-Agent Mesh.",
+        recommendedTechStack: ["Google Cloud Vertex", "Go", "Docker", "GraphQL", "Pub/Sub"],
+        suggestedProjects: [
+          {
+            name: "Real-time Collaboration Workspace",
+            description: "Build using React, Go WebSockets, and PostgreSQL to master full-stack state and concurrency."
+          },
+          {
+            name: "Microservices E-Commerce API",
+            description: "Dockerize independent Go services (auth, inventory, payments) to learn container orchestration."
+          },
+          {
+            name: "GraphQL Analytics Dashboard",
+            description: "Aggregate complex data via GraphQL into a modern Tailwind dashboard."
+          }
+        ]
+      },
+      githubHeatmap: heatmap,
+      evidence: {
+        githubRepos: [
+          { name: "credo-ai-passport", url: "https://github.com/uselessdevloper/credo-ai-passport", language: "TypeScript", stars: 18 },
+          { name: "signal-mesh", url: "https://github.com/uselessdevloper/signal-mesh", language: "Python", stars: 24 }
+        ],
+        certificates: [
+          { name: "Google Cloud Professional Architect", issuer: "Google Cloud", url: "#" },
+          { name: "Distributed Systems & Concurrency", issuer: "Stanford Online", url: "#" }
+        ]
+      }
+    };
+
+    studentPassportData = {
+      cardId: "CDY2026-0007421",
+      studentId: "CDY26S7421",
+      name: "Utkarsh Sinha",
+      gender: "Male",
+      degree: "B.Tech – Computer Science Engineering",
+      college: "IIT Delhi",
+      avatarUrl: mappedData.profileImage,
+      issueDate: "03 SEP 2026",
+      expiryDate: "03 SEP 2028",
+      coursesCompleted: 14,
+      skillsVerified: 12,
+      certificatesEarned: 3,
+      verificationUrl: "https://signal.dev/verify/passport/CDY26S7421"
+    };
   }
 
   return (

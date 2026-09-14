@@ -707,5 +707,3 @@ def get_registry():
 
 
 app.mount("/gitproof", gitproof_app)
-
-

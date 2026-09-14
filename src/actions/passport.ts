@@ -9,10 +9,78 @@ import { z } from "zod";
 
 export async function generatePassport() {
   const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  let user: any = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user;
+  } catch (err) {
+    console.warn("Supabase auth check skipped/failed:", err);
+  }
 
-  if (authError || !user) {
-    throw new Error("Unauthorized");
+  // If unauthenticated / guest demo user, return rich demo passport snapshot immediately
+  if (!user) {
+    return {
+      success: true,
+      jobId: "demo-job",
+      snapshotData: {
+        card_id: "CDY2026-0007421",
+        student_id: "CDY26S7421",
+        issue_date: "03 SEP 2026",
+        expiry_date: "03 SEP 2028",
+        verification_url: "https://signal.dev/verify/passport/CDY26S7421",
+        degree: "B.Tech – Computer Science Engineering",
+        gender: "Male",
+        courses_completed: 14,
+        skills_verified: 12,
+        certificates_earned: 3,
+        profile: {
+          name: "Utkarsh Sinha",
+          headline: "Full-Stack & AI Systems Engineer",
+          country: "India",
+          college: "IIT Delhi",
+          avatar_url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80",
+          gender: "Male",
+          degree: "B.Tech – Computer Science Engineering",
+        },
+        github: {
+          username: "uselessdevloper",
+          total_repos: 14,
+          total_stars: 48,
+        },
+        certificates: 3,
+        skills: [
+          { name: "TypeScript", confidence: "High", evidence: ["14 repos using TypeScript", "Verified GitProof commit graph"] },
+          { name: "Next.js", confidence: "High", evidence: ["10 repos using Next.js", "Production deployment verified"] },
+          { name: "Python", confidence: "High", evidence: ["8 repos using Python", "FastAPI & LangGraph pipelines"] },
+          { name: "Google Cloud", confidence: "High", evidence: ["Cloud Run, Vertex AI & BigQuery integration"] },
+          { name: "React", confidence: "High", evidence: ["Interactive UI & micro-frontend architecture"] },
+          { name: "PostgreSQL", confidence: "Medium", evidence: ["Schema design & relational indexing"] }
+        ],
+        has_flagged_items: false,
+        top_projects: [
+          { name: "credo-ai-passport", description: "Cryptographic skill passport verification engine", language: "TypeScript", stars: 18 },
+          { name: "signal-mesh", description: "Distributed multi-agent job application orchestrator", language: "Python", stars: 24 }
+        ],
+        insights: {
+          gap_analysis_text: "Proficient in full-stack architecture with strong TypeScript and Cloud systems foundation. Next milestone: Distributed Systems & Autonomous Agents.",
+          recommended_tech_stack: ["Google Cloud Vertex", "Go", "Docker", "GraphQL"],
+          suggested_projects: [
+            {
+              name: "Real-time Collaboration Workspace",
+              description: "Build using React, Go WebSockets, and PostgreSQL to master full-stack state and concurrency."
+            },
+            {
+              name: "Microservices E-Commerce API",
+              description: "Dockerize independent Go services (auth, inventory, payments) to learn container orchestration."
+            },
+            {
+              name: "GraphQL Analytics Dashboard",
+              description: "Aggregate complex data via GraphQL into a modern Tailwind dashboard."
+            }
+          ]
+        }
+      }
+    };
   }
 
   // 1. Insert/update job
@@ -104,7 +172,7 @@ export async function generatePassport() {
 
     // 4. Generate deterministic Student ID & Card ID
     const shortHash = Math.abs(
-      user.id.split("").reduce((acc, char) => (acc << 5) - acc + char.charCodeAt(0), 0)
+      user.id.split("").reduce((acc: number, char: string) => (acc << 5) - acc + char.charCodeAt(0), 0)
     ).toString().slice(0, 4).padStart(4, "7421");
 
     const currentYear = new Date().getFullYear();
