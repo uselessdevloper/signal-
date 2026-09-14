@@ -38,34 +38,38 @@ export default async function PublicPassportPage({ params }: PageProps) {
   }
 
   if (!snapshot) {
+    const displayName = username === "uselessdevloper" ? "Utkarsh Sinha" : username;
     snapshot = {
-      name: username === "uselessdevloper" ? "Utkarsh Sinha" : username,
-      careerGoal: "Full-Stack & AI Systems Engineer",
-      profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80",
-      verifiedSkills: [
-        { name: "TypeScript", confidence: "High" },
-        { name: "Next.js", confidence: "High" },
-        { name: "Python", confidence: "High" },
-        { name: "Google Cloud", confidence: "High" },
-        { name: "React", confidence: "High" },
-        { name: "PostgreSQL", confidence: "Medium" }
-      ],
-      githubRepos: 14,
-      certificates: 3,
-      verifiedSkillsCount: 12,
-      missingSkills: 0,
-      missingSkillsAnalysis: {
-        description: "Proficient in full-stack architecture with strong TypeScript and Cloud systems foundation.",
-        recommendedTechStack: ["Google Cloud Vertex", "Go", "Docker", "GraphQL"],
-        suggestedProjects: []
+      profile: {
+        name: displayName,
+        headline: "Full-Stack & AI Systems Engineer",
+        country: "India",
+        college: "IIT Delhi",
+        avatar_url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80",
       },
-      githubHeatmap: Array(7).fill(0).map((_, r) => Array(52).fill(0).map((_, c) => (r * 7 + c * 13) % 4)),
-      evidence: {
-        githubRepos: [
-          { name: "credo-ai-passport", url: "https://github.com/uselessdevloper/credo-ai-passport", language: "TypeScript", stars: 18 },
-          { name: "signal-mesh", url: "https://github.com/uselessdevloper/signal-mesh", language: "Python", stars: 24 }
-        ],
-        certificates: []
+      github: {
+        username: username,
+        total_repos: 14,
+        total_stars: 48,
+      },
+      certificates: 3,
+      skills: [
+        { name: "TypeScript", confidence: "High", evidence: ["14 repos using TypeScript", "Verified GitProof commit graph"] },
+        { name: "Next.js", confidence: "High", evidence: ["10 repos using Next.js", "Production deployment verified"] },
+        { name: "Python", confidence: "High", evidence: ["8 repos using Python", "FastAPI & LangGraph pipelines"] },
+        { name: "Google Cloud", confidence: "High", evidence: ["Cloud Run, Vertex AI & BigQuery integration"] },
+        { name: "React", confidence: "High", evidence: ["Interactive UI & micro-frontend architecture"] },
+        { name: "PostgreSQL", confidence: "Medium", evidence: ["Schema design & relational indexing"] }
+      ],
+      has_flagged_items: false,
+      top_projects: [
+        { name: "credo-ai-passport", description: "Cryptographic skill passport verification engine", language: "TypeScript", stars: 18 },
+        { name: "signal-mesh", description: "Distributed multi-agent job application orchestrator", language: "Python", stars: 24 }
+      ],
+      insights: {
+        gap_analysis_text: "Proficient in full-stack architecture with strong TypeScript and Cloud systems foundation.",
+        recommended_tech_stack: ["Google Cloud Vertex", "Go", "Docker", "GraphQL"],
+        suggested_projects: []
       }
     };
   }
