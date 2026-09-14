@@ -25,8 +25,13 @@ async function applySchema() {
   /* eslint-disable @typescript-eslint/no-require-imports */
 const { execSync } = require('child_process');
   const { Client } = require('pg');
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  if (!connectionString) {
+    console.error("Missing DATABASE_URL or POSTGRES_URL environment variable.");
+    process.exit(1);
+  }
   const client = new Client({
-    connectionString: "postgresql://postgres.wizuwacevushwlegfgyu:subham1234@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+    connectionString: connectionString
   });
 
   try {
