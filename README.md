@@ -93,9 +93,14 @@ flowchart TD
 SIGNAL is built natively on Google Cloud services for enterprise-grade scalability, security, and low-latency inference:
 
 - **Gemini 2.5 Flash (`gemini-2.5-flash`)**: High-speed multimodal LLM for intent extraction, semantic parsing, and outreach generation via Vertex AI / Google GenAI SDK.
-- **Cloud Pub/Sub**: Event-driven ingestion of Gmail push notifications and application status events.
-- **Cloud Firestore**: Sub-10ms real-time database synchronizing Kanban board state and candidate forensic cards.
+- **Vertex AI Search Grounding**: Real-time company and job listing background checks powered by live Google Search grounding to detect ghost jobs and employer scams.
+- **Cloud Text-to-Speech (Neural2)**: Studio-quality natural voice synthesis (`en-US-Neural2-F`) simulating conversational AI technical mock interviews.
+- **Google Cloud Secret Manager**: Automated IAM-governed secret access without plaintext secrets in codebases.
+- **Google Cloud BigQuery**: Real-time hiring telemetry streaming into `signal_analytics.application_events` to compute hiring velocity and recruiter response benchmarks.
+- **Cloud Pub/Sub**: Event-driven ingestion of Gmail push notifications and application status events (`gmail-ingest-topic`).
+- **Cloud Firestore**: Sub-10ms real-time database synchronizing Kanban board state, recruiter logs, and candidate forensic cards.
 - **Cloud Tasks**: Durable queue scheduling for interview preparation reminders (`signal-interview-alerts`) and recruiter follow-up nudges (`signal-recruiter-followup`).
+- **Cloud Storage (GCS)**: Secure bucket storage (`signal-credo-80584973320`) for resume PDFs and generated cryptographic badge assets.
 - **Cloud Run**: Serverless container execution runtime hosting the FastAPI backend and LangGraph agents.
 
 ---

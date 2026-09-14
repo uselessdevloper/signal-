@@ -140,6 +140,15 @@ def auth_logout(request: Request):
 
 
 
+class CompanyVerificationRequest(BaseModel):
+    company: str = "Google"
+    role: Optional[str] = "Senior Software Engineer"
+
+class TTSSynthesizeRequest(BaseModel):
+    text: str = "Welcome to your technical mock interview with SIGNAL. Let's discuss your experience building distributed multi-agent systems."
+    voice: Optional[str] = "en-US-Neural2-F"
+    speaking_rate: Optional[float] = 1.05
+
 class PipelineRunRequest(BaseModel):
     inbound_email: Optional[Dict[str, Any]] = None
     company: Optional[str] = "TechCorp"
@@ -299,9 +308,66 @@ class ImageGenerateRequest(BaseModel):
 
 @app.get("/api/gcp/status")
 def get_gcp_service_status():
-    """Check live status of Google Cloud services (Pub/Sub, Firestore, Storage, Gemini Text/Image)."""
+    """Check live status of Google Cloud services (Pub/Sub, Firestore, Storage, Gemini, Search Grounding, Cloud TTS, Secret Manager, BigQuery)."""
     import gcp_service
     return gcp_service.get_gcp_status()
+
+
+@app.post("/api/gcp/grounding/verify-company")
+def verify_company_grounding(req: CompanyVerificationRequest):
+    """Real-time company & job legitimacy check using Vertex AI Gemini 2.5 Flash grounded in Google Search."""
+    import gcp_service
+    try:
+        res = gcp_service.verify_company_with_search_grounding(
+            company_name=req.company,
+            role_title=req.role or "Software Engineer"
+        )
+        return res
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "GROUNDING_VERIFICATION_FAILED", "message": str(e)}
+        )
+
+
+@app.post("/api/gcp/tts/synthesize")
+def synthesize_tts_speech(req: TTSSynthesizeRequest):
+    """Synthesize interactive AI technical interviewer speech using Google Cloud Text-to-Speech (Neural2)."""
+    import gcp_service
+    try:
+        res = gcp_service.synthesize_mock_interview_speech(
+            text=req.text,
+            voice_name=req.voice or "en-US-Neural2-F",
+            speaking_rate=req.speaking_rate or 1.05
+        )
+        return res
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "TTS_SYNTHESIS_FAILED", "message": str(e)}
+        )
+
+
+@app.get("/api/gcp/secrets")
+def get_cloud_secrets_list():
+    """List managed enterprise secrets from Google Cloud Secret Manager."""
+    import gcp_service
+    return {
+        "success": True,
+        "secrets": gcp_service.list_managed_secrets(),
+        "provider": "Google Cloud Secret Manager"
+    }
+
+
+@app.get("/api/gcp/bigquery/market-radar")
+def get_bigquery_market_radar():
+    """Fetch application outcomes, hiring benchmarks, and telemetry from Google Cloud BigQuery."""
+    import gcp_service
+    return {
+        "success": True,
+        "insights": gcp_service.get_bigquery_market_insights(),
+        "engine": "Google Cloud BigQuery Streaming Buffer"
+    }
 
 
 @app.post("/api/image/generate")
